@@ -1,17 +1,17 @@
 import Navigation from "@/components/Navigation";
-import LandingPage from "@/components/LandingPage";
+import Dashboard from "@/components/Dashboard";
 
-const Index = () => {
+const DashboardPage = () => {
   // This would come from your auth context
-  const isAuthenticated = false;
-  const userName = null;
+  const isAuthenticated = true;
+  const userName = "Alex";
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation isAuthenticated={isAuthenticated} userName={userName} />
-      <LandingPage />
+      <Dashboard />
     </div>
   );
 };
 
-export default Index;
+export default DashboardPage;

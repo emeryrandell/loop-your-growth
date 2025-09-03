@@ -2,41 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Looped Design System - Modern, minimal self-improvement platform
+All colors MUST be HSL for proper theming.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand Colors - Warm, motivational palette */
+    --background: 45 15% 97%;
+    --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Energizing coral/orange for CTAs */
+    --primary: 14 90% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 14 95% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Warm cream tones */
+    --secondary: 45 20% 94%;
+    --secondary-foreground: 215 25% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Soft neutrals */
+    --muted: 45 10% 90%;
+    --muted-foreground: 215 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Deep navy for contrast */
+    --accent: 215 85% 25%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Success - Fresh green for streaks */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-glow: 142 80% 45%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 45 15% 85%;
+    --input: 45 15% 90%;
+    --ring: 14 90% 60%;
+
+    --radius: 0.75rem;
+    
+    /* Gradients - Warm, motivational gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(14 85% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(45 20% 98%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-glow)));
+    
+    /* Shadows - Elegant depth */
+    --shadow-soft: 0 2px 20px -5px hsl(var(--foreground) / 0.1);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.2);
+    --shadow-success: 0 0 25px hsl(var(--success) / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +126,72 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Typography - Elegant serif headlines, clean sans-serif body */
+  .font-display {
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+  
+  .font-sans {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-primary to-primary-glow text-primary-foreground 
+           shadow-lg hover:shadow-glow hover:scale-105 
+           transition-all duration-300 font-medium;
+  }
+  
+  .btn-ghost-warm {
+    @apply bg-secondary/50 text-secondary-foreground border border-border
+           hover:bg-secondary hover:shadow-soft
+           transition-all duration-200;
+  }
+
+  /* Card Styles */
+  .card-gradient {
+    background: var(--gradient-card);
+    @apply shadow-soft border border-border/50;
+  }
+  
+  .card-feature {
+    @apply bg-card border border-border/30 hover:border-primary/20
+           hover:shadow-soft transition-all duration-300
+           backdrop-blur-sm;
+  }
+
+  /* Progress & Streak Styles */
+  .streak-glow {
+    @apply text-success font-bold text-4xl md:text-6xl;
+    text-shadow: 0 0 20px hsl(var(--success) / 0.3);
+  }
+  
+  .progress-card {
+    background: var(--gradient-success);
+    @apply text-success-foreground p-6 rounded-2xl shadow-success;
+  }
+
+  /* Animations */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 20px hsl(var(--primary) / 0.2); }
+    100% { box-shadow: 0 0 30px hsl(var(--primary) / 0.4); }
   }
 }
