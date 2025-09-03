@@ -120,6 +120,11 @@ export default {
 			fontFamily: {
 				'display': ['Georgia', 'Times New Roman', 'serif'],
 				'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+			},
+			boxShadow: {
+				'soft': '0 2px 20px -5px hsl(var(--foreground) / 0.1)',
+				'glow': '0 0 30px hsl(var(--primary) / 0.2)',
+				'success': '0 0 25px hsl(var(--success) / 0.3)'
 			}
 		}
 	},
