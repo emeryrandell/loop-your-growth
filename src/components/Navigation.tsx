@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
-import AuthDialog from "./AuthDialog";
+import { Menu, X, Zap } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavigationProps {
   isAuthenticated?: boolean;
@@ -10,10 +11,12 @@ interface NavigationProps {
 
 const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  const handleSignOut = () => {
-    // TODO: Implement sign out functionality
-    console.log("Signing out...");
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -21,52 +24,29 @@ const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <a href="/" className="font-display text-2xl font-bold text-foreground">
-              Looped
-            </a>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary-glow rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-display text-xl font-bold text-foreground">Looped</span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {!isAuthenticated ? (
               <>
-                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Features
-                </a>
-                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Pricing
-                </a>
-                <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">
-                  FAQ
-                </a>
-                <AuthDialog>
-                  <Button variant="outline">Sign In</Button>
-                </AuthDialog>
-                <AuthDialog>
-                  <Button className="btn-hero">Start Free</Button>
-                </AuthDialog>
+                <Link to="/features" className="text-foreground hover:text-primary transition-colors">Features</Link>
+                <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">Pricing</Link>
+                <Link to="/faq" className="text-foreground hover:text-primary transition-colors">FAQ</Link>
+                <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
+                <Button className="btn-hero" onClick={() => navigate("/auth")}>Start Free</Button>
               </>
             ) : (
               <>
-                <a href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Dashboard
-                </a>
-                <a href="/progress" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Progress
-                </a>
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm text-muted-foreground">
-                    Hey, {userName || "there"}!
-                  </span>
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Link to="/dashboard" className="text-foreground hover:text-primary transition-colors">Dashboard</Link>
+                <Link to="/progress" className="text-foreground hover:text-primary transition-colors">Progress</Link>
+                <Button variant="ghost" onClick={handleSignOut}>Sign Out</Button>
+                <span className="text-muted-foreground">Welcome, {userName}</span>
               </>
             )}
           </div>
@@ -93,39 +73,30 @@ const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
             <div className="flex flex-col space-y-4">
               {!isAuthenticated ? (
                 <>
-                  <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Link to="/features" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsMenuOpen(false)}>
                     Features
-                  </a>
-                  <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                  </Link>
+                  <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsMenuOpen(false)}>
                     Pricing
-                  </a>
-                  <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">
+                  </Link>
+                  <Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsMenuOpen(false)}>
                     FAQ
-                  </a>
+                  </Link>
                   <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                    <AuthDialog>
-                      <Button variant="outline" className="w-full">Sign In</Button>
-                    </AuthDialog>
-                    <AuthDialog>
-                      <Button className="btn-hero w-full">Start Free</Button>
-                    </AuthDialog>
+                    <Button variant="outline" className="w-full" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>Sign In</Button>
+                    <Button className="btn-hero w-full" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>Start Free</Button>
                   </div>
                 </>
               ) : (
                 <>
-                  <a href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsMenuOpen(false)}>
                     Dashboard
-                  </a>
-                  <a href="/progress" className="text-muted-foreground hover:text-foreground transition-colors">
+                  </Link>
+                  <Link to="/progress" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsMenuOpen(false)}>
                     Progress
-                  </a>
+                  </Link>
                   <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                    <Button variant="outline" size="sm" className="w-full">
-                      <User className="h-4 w-4 mr-2" />
-                      Profile
-                    </Button>
-                    <Button variant="ghost" size="sm" className="w-full" onClick={handleSignOut}>
-                      <LogOut className="h-4 w-4 mr-2" />
+                    <Button variant="ghost" size="sm" className="w-full" onClick={() => { handleSignOut(); setIsMenuOpen(false); }}>
                       Sign Out
                     </Button>
                   </div>

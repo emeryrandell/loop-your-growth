@@ -111,7 +111,7 @@ const LandingPage = () => {
                   <span className="text-4xl font-bold">$9.99</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
-                <Button className="w-full btn-ghost-warm">
+                <Button className="w-full btn-ghost-warm" onClick={() => window.location.href = "/pricing"}>
                   Get Started
                 </Button>
               </CardContent>
@@ -129,7 +129,7 @@ const LandingPage = () => {
                   <span className="text-muted-foreground">/year</span>
                 </div>
                 <p className="text-sm text-success font-medium mb-6">Save $20 annually</p>
-                <Button className="w-full btn-hero">
+                <Button className="w-full btn-hero" onClick={() => window.location.href = "/pricing"}>
                   Get Started
                 </Button>
               </CardContent>
