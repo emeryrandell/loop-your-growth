@@ -14,7 +14,212 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      challenges: {
+        Row: {
+          benefit: string | null
+          created_at: string
+          day_number: number
+          description: string
+          difficulty: string | null
+          estimated_minutes: number | null
+          id: string
+          title: string
+          track: string
+        }
+        Insert: {
+          benefit?: string | null
+          created_at?: string
+          day_number: number
+          description: string
+          difficulty?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          title: string
+          track: string
+        }
+        Update: {
+          benefit?: string | null
+          created_at?: string
+          day_number?: number
+          description?: string
+          difficulty?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          title?: string
+          track?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          daily_time_available: number | null
+          difficulty_preference: string | null
+          email: string
+          full_name: string | null
+          id: string
+          onboarding_completed: boolean | null
+          preferred_track: string | null
+          subscription_end: string | null
+          subscription_status: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_time_available?: number | null
+          difficulty_preference?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          preferred_track?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_time_available?: number | null
+          difficulty_preference?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          preferred_track?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      progress_cards: {
+        Row: {
+          card_data: Json | null
+          challenge_title: string
+          created_at: string
+          day_number: number
+          id: string
+          shared_at: string | null
+          streak_count: number
+          track: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          card_data?: Json | null
+          challenge_title: string
+          created_at?: string
+          day_number: number
+          id?: string
+          shared_at?: string | null
+          streak_count: number
+          track: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          card_data?: Json | null
+          challenge_title?: string
+          created_at?: string
+          day_number?: number
+          id?: string
+          shared_at?: string | null
+          streak_count?: number
+          track?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      streaks: {
+        Row: {
+          created_at: string
+          current_streak: number | null
+          id: string
+          last_completion_date: string | null
+          longest_streak: number | null
+          streak_start_date: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_completion_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_completion_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_challenges: {
+        Row: {
+          challenge_id: string | null
+          completion_date: string | null
+          created_at: string
+          feedback: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          trainer_response: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          trainer_response?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          trainer_response?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
