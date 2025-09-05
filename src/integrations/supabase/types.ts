@@ -17,6 +17,7 @@ export type Database = {
       challenges: {
         Row: {
           benefit: string | null
+          category: string
           created_at: string
           day_number: number
           description: string
@@ -24,10 +25,10 @@ export type Database = {
           estimated_minutes: number | null
           id: string
           title: string
-          track: string
         }
         Insert: {
           benefit?: string | null
+          category: string
           created_at?: string
           day_number: number
           description: string
@@ -35,10 +36,10 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           title: string
-          track: string
         }
         Update: {
           benefit?: string | null
+          category?: string
           created_at?: string
           day_number?: number
           description?: string
@@ -46,7 +47,6 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           title?: string
-          track?: string
         }
         Relationships: []
       }
