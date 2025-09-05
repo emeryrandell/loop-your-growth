@@ -173,6 +173,87 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          demo_completed: boolean | null
+          demo_completed_at: string | null
+          id: string
+          plan_type: string | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          demo_completed?: boolean | null
+          demo_completed_at?: string | null
+          id?: string
+          plan_type?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          demo_completed?: boolean | null
+          demo_completed_at?: string | null
+          id?: string
+          plan_type?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      trainer_settings: {
+        Row: {
+          constraints: string | null
+          created_at: string
+          difficulty_preference: number | null
+          focus_areas: string[] | null
+          goals: string | null
+          id: string
+          onboarding_completed: boolean | null
+          time_budget: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          constraints?: string | null
+          created_at?: string
+          difficulty_preference?: number | null
+          focus_areas?: string[] | null
+          goals?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          time_budget?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          constraints?: string | null
+          created_at?: string
+          difficulty_preference?: number | null
+          focus_areas?: string[] | null
+          goals?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          time_budget?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_challenges: {
         Row: {
           challenge_id: string | null
