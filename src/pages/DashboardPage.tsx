@@ -1,17 +1,17 @@
 import Navigation from "@/components/Navigation";
-import Dashboard from "@/components/Dashboard";
+import NewDashboard from "@/components/NewDashboard";
+import { useTrainer } from "@/hooks/useTrainer";
 
 const DashboardPage = () => {
-  // This would come from your auth context
-  const isAuthenticated = true;
-  const userName = "Alex";
+  const { canAccessPaidFeatures } = useTrainer();
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation isAuthenticated={isAuthenticated} userName={userName} />
-      <Dashboard />
-    </div>
-  );
+  if (!canAccessPaidFeatures) {
+    // Redirect to upgrade page or demo
+    window.location.href = '/demo';
+    return null;
+  }
+
+  return <NewDashboard />;
 };
 
 export default DashboardPage;

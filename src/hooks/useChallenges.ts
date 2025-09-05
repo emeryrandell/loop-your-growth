@@ -5,12 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface Challenge {
   id: string;
-  track: 'study' | 'fitness' | 'mindset' | 'lifestyle';
+  category: string;
   day_number: number;
   title: string;
   description: string;
   benefit?: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: string;
   estimated_minutes: number;
 }
 
@@ -103,7 +103,7 @@ export function useChallenges() {
 
   // Get today's challenge
   const { data: todayChallenge, isLoading: todayChallengeLoading } = useQuery({
-    queryKey: ['today-challenge', user?.id, currentDay, profile?.preferred_track],
+    queryKey: ['today-challenge', user?.id, currentDay],
     queryFn: async () => {
       if (!user) return null;
       
@@ -129,63 +129,34 @@ export function useChallenges() {
       const { data: challenges, error: challengesError } = await supabase
         .from('challenges')
         .select('*')
-        .eq('track', track)
-        .eq('day_number', currentDay)
-        .limit(1)
+        .eq('category', 'mindset')
+        .eq('day_number', Math.min(currentDay, 5))
+        .limit(1);
+      
+      if (challengesError || !challenges || challenges.length === 0) {
+        return null;
+      } 
+
+      const selectedChallenge = challenges[0];
+      const { data: newUserChallenge, error: createError } = await supabase
+        .from('user_challenges')
+        .insert({
+          user_id: user.id,
+          challenge_id: selectedChallenge.id,
+          status: 'pending'
+        })
+        .select(`
+          *,
+          challenges (*)
+        `)
         .single();
       
-      if (challengesError || !challenges) {
-        // Fallback to day 1 if current day doesn't exist
-        const { data: fallbackChallenge, error: fallbackError } = await supabase
-          .from('challenges')
-          .select('*')
-          .eq('track', track)
-          .eq('day_number', 1)
-          .limit(1)
-          .single();
-        
-        if (fallbackError) throw fallbackError;
-        
-        if (fallbackChallenge) {
-          // Create user challenge entry
-          const { data: newUserChallenge, error: createError } = await supabase
-            .from('user_challenges')
-            .insert({
-              user_id: user.id,
-              challenge_id: fallbackChallenge.id,
-              status: 'pending'
-            })
-            .select(`
-              *,
-              challenges (*)
-            `)
-            .single();
-          
-          if (createError) throw createError;
-          return newUserChallenge;
-        }
-      } else {
-        // Create user challenge entry for the found challenge
-        const { data: newUserChallenge, error: createError } = await supabase
-          .from('user_challenges')
-          .insert({
-            user_id: user.id,
-            challenge_id: challenges.id,
-            status: 'pending'
-          })
-          .select(`
-            *,
-            challenges (*)
-          `)
-          .single();
-        
-        if (createError) throw createError;
-        return newUserChallenge;
-      }
+      if (createError) throw createError;
+      return newUserChallenge;
       
       return null;
     },
-    enabled: !!user && !!profile,
+    enabled: !!user,
   });
 
   // Get challenge history
