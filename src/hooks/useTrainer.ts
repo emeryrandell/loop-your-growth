@@ -294,7 +294,6 @@ export function useTrainer() {
     completeOnboarding,
     completeChallenge,
     isOnboardingComplete: trainerSettings?.onboarding_completed || false,
-    isDemoComplete: subscription?.demo_completed || false,
-    canAccessPaidFeatures: subscription?.status === 'active' || !subscription?.demo_completed,
+    canAccessPaidFeatures: true, // All features available without payment
   };
 }

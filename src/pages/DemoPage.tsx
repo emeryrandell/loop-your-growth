@@ -19,9 +19,8 @@ const DemoPage = () => {
     setCompleted(true);
   };
 
-  const handleSubscribe = () => {
-    // TODO: Redirect to Stripe checkout
-    console.log("Redirecting to subscription...");
+  const handleContinue = () => {
+    window.location.href = "/auth";
   };
 
   return (
@@ -105,28 +104,18 @@ const DemoPage = () => {
                 
                 <div className="space-y-3">
                   <Button 
-                    onClick={handleSubscribe}
+                    onClick={handleContinue}
                     className="btn-hero w-full"
                     disabled={!completed}
                   >
-                    Unlock Day 2 - $9.99/mo
+                    Continue Your Journey
                     <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                  
-                  <Button 
-                    onClick={handleSubscribe}
-                    variant="outline"
-                    className="w-full"
-                    disabled={!completed}
-                  >
-                    Get Yearly - $99.99
-                    <Badge className="ml-2 bg-success text-success-foreground">Save $20</Badge>
                   </Button>
                 </div>
 
                 {!completed && (
                   <p className="text-xs text-muted-foreground">
-                    Complete Day 1 to unlock subscription options
+                    Complete Day 1 to continue your journey
                   </p>
                 )}
               </CardContent>
