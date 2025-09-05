@@ -9,19 +9,135 @@ interface ProgressCardProps {
 }
 
 const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) => {
-  const handleDownload = () => {
-    // TODO: Implement PNG download functionality
-    console.log("Downloading progress card...");
+  const handleDownload = async () => {
+    try {
+      const cardElement = document.querySelector('.progress-card');
+      if (!cardElement) return;
+
+      // Create a canvas from the card element
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Set canvas size
+      canvas.width = 320;
+      canvas.height = 400;
+
+      // Create gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#10b981');
+      gradient.addColorStop(1, '#059669');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Add content
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Looped', canvas.width / 2, 60);
+      
+      ctx.font = '14px Arial';
+      ctx.fillText('1% Better, Every Day', canvas.width / 2, 85);
+
+      ctx.font = 'bold 32px Arial';
+      ctx.fillText(`Day ${day} ✅`, canvas.width / 2, 160);
+
+      ctx.font = '20px Arial';
+      ctx.fillText(`Streak: ${streak} Days`, canvas.width / 2, 200);
+
+      ctx.font = '14px Arial';
+      ctx.fillText(`${userName} is building momentum`, canvas.width / 2, 280);
+
+      ctx.font = '12px Arial';
+      ctx.fillText('Join the movement at looped.app', canvas.width / 2, 320);
+
+      // Download the image
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `looped-day-${day}-progress.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   };
 
-  const handleCopyToClipboard = () => {
-    // TODO: Implement copy to clipboard functionality
-    console.log("Copying to clipboard...");
+  const handleCopyToClipboard = async () => {
+    try {
+      const cardElement = document.querySelector('.progress-card');
+      if (!cardElement) return;
+
+      // Same canvas creation logic as download
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = 320;
+      canvas.height = 400;
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#10b981');
+      gradient.addColorStop(1, '#059669');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Looped', canvas.width / 2, 60);
+      
+      ctx.font = '14px Arial';
+      ctx.fillText('1% Better, Every Day', canvas.width / 2, 85);
+
+      ctx.font = 'bold 32px Arial';
+      ctx.fillText(`Day ${day} ✅`, canvas.width / 2, 160);
+
+      ctx.font = '20px Arial';
+      ctx.fillText(`Streak: ${streak} Days`, canvas.width / 2, 200);
+
+      ctx.font = '14px Arial';
+      ctx.fillText(`${userName} is building momentum`, canvas.width / 2, 280);
+
+      ctx.font = '12px Arial';
+      ctx.fillText('Join the movement at looped.app', canvas.width / 2, 320);
+
+      // Copy to clipboard
+      canvas.toBlob(async (blob) => {
+        if (blob && navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+        }
+      });
+    } catch (error) {
+      console.error('Copy failed:', error);
+    }
   };
 
-  const handleShare = () => {
-    // TODO: Implement native share functionality
-    console.log("Opening share menu...");
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Day ${day} Complete! 🎉`,
+          text: `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum! 💪`,
+          url: 'https://looped.app'
+        });
+      } else {
+        // Fallback: copy text to clipboard
+        const shareText = `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum! 💪 Join me at https://looped.app`;
+        await navigator.clipboard.writeText(shareText);
+        alert('Share text copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+    }
   };
 
   return (
