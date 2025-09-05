@@ -26,24 +26,24 @@ const FAQPage = () => {
       faqs: [
         {
           question: "What is Looped and how does it work?",
-          answer: "Looped is a self-improvement platform that helps you build better habits through daily 1% challenges. Our AI trainer provides personalized tasks across four tracks: Study, Fitness, Mindset, and Lifestyle. Each challenge is designed to be small and achievable, taking just 5-30 minutes of your day."
+          answer: "Looped helps you get 1% better every day through personalized micro-challenges. Your personal Trainer creates daily tasks tailored to your goals across 8 life areas: Energy/Movement, Mindset, Focus/Work, Relationships, Home/Environment, Finance, Creativity, and Recovery/Sleep. Each challenge takes just 5-30 minutes."
         },
         {
           question: "How do I get started?",
           answer: "Simply sign up for our free demo to try your first challenge. No credit card required! After experiencing the platform, you can upgrade to Premium for full access to all features including streak tracking, progress cards, and unlimited challenges."
         },
         {
-          question: "What are the four tracks?",
-          answer: "Study (academic improvement), Fitness (physical health), Mindset (mental wellness), and Lifestyle (life organization). Each track has scientifically-designed challenges that progress in difficulty as you build consistency."
+          question: "What are the 8 challenge categories?",
+          answer: "Energy/Movement (physical wellness), Mindset (mental health), Focus/Work (productivity), Relationships (connections), Home/Environment (organization), Finance (money habits), Creativity (self-expression), and Recovery/Sleep (rest). Each area helps you grow holistically."
         }
       ]
     },
     {
-      title: "AI Trainer & Challenges",
+      title: "Your Personal Trainer",
       faqs: [
         {
-          question: "How does the AI trainer personalize my challenges?",
-          answer: "The AI trainer analyzes your completion patterns, feedback, and preferences to adapt future challenges. If you find tasks too easy or hard, it adjusts difficulty. It also considers your available time and preferred focus areas."
+          question: "How does my personal Trainer customize challenges?",
+          answer: "Your Trainer learns from your feedback and completion patterns to create perfect-fit challenges. It remembers what you enjoy, adjusts difficulty based on your responses, and respects your time preferences to keep you motivated and growing."
         },
         {
           question: "What if I miss a day?",
@@ -85,7 +85,7 @@ const FAQPage = () => {
         },
         {
           question: "Do you offer refunds?",
-          answer: "We offer a 30-day money-back guarantee for Premium subscriptions. If you're not satisfied within the first 30 days, we'll provide a full refund, no questions asked."
+          answer: "We don't offer refunds, but we believe you'll love the transformation that comes from consistent daily growth. Try our free demo first to see if Looped is right for you!"
         }
       ]
     },
@@ -102,7 +102,7 @@ const FAQPage = () => {
         },
         {
           question: "How do I contact support?",
-          answer: "Premium users get priority support via email. You can also reach us through our community forum or the contact form. We typically respond within 24 hours."
+          answer: "You can reach us at contactloopedpro@gmail.com for any questions or support. Response times may vary, but we do our best to help everyone on their growth journey!"
         }
       ]
     }
@@ -230,7 +230,7 @@ const FAQPage = () => {
                   <Button 
                     variant="outline"
                     className="w-full"
-                    onClick={() => window.location.href = "mailto:support@looped.app"}
+                    onClick={() => window.location.href = "mailto:contactloopedpro@gmail.com"}
                   >
                     Email Support
                   </Button>
