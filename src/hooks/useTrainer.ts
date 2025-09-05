@@ -183,11 +183,13 @@ export function useTrainer() {
 
       const { error } = await supabase
         .from('trainer_settings')
-        .update({
+        .upsert({
+          user_id: user.id,
           ...onboardingData,
           onboarding_completed: true
-        })
-        .eq('user_id', user.id);
+        }, { 
+          onConflict: 'user_id'
+        });
 
       if (error) throw error;
     },
