@@ -3,37 +3,120 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import ProgressCard from "@/components/ProgressCard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProgressPage = () => {
-  const isAuthenticated = true;
-  const userName = "Alex";
+  const { user } = useAuth();
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || "Looper";
   
-  const progressData = {
-    currentDay: 7,
-    currentStreak: 7,
-    bestStreak: 12,
-    totalChallenges: 7,
-    completionRate: 85,
-    focusArea: "Study"
-  };
+  // Fetch user streak data
+  const { data: streakData } = useQuery({
+    queryKey: ['user-streak'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('streaks')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
+  });
 
-  const recentChallenges = [
-    { day: 7, title: "Active Recall Session", completed: true, difficulty: "beginner" },
-    { day: 6, title: "Morning Pages", completed: true, difficulty: "beginner" },
-    { day: 5, title: "Deep Work Block", completed: true, difficulty: "intermediate" },
-    { day: 4, title: "Digital Detox Hour", completed: false, difficulty: "beginner" },
-    { day: 3, title: "Learning Review", completed: true, difficulty: "beginner" },
-  ];
+  // Calculate total challenges completed
+  const { data: totalChallenges = 0 } = useQuery({
+    queryKey: ['total-challenges-completed'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .eq('status', 'completed');
+      
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user
+  });
+
+  // Calculate completion rate
+  const { data: completionRate = 0 } = useQuery({
+    queryKey: ['user-completion-rate'],
+    queryFn: async () => {
+      const { count: completed, error: completedError } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .eq('status', 'completed');
+
+      const { count: total, error: totalError } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id);
+      
+      if (completedError || totalError) return 0;
+      
+      const completedCount = completed || 0;
+      const totalCount = total || 0;
+      
+      return totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    },
+    enabled: !!user
+  });
+
+  // Fetch recent challenges
+  const { data: recentChallenges = [] } = useQuery({
+    queryKey: ['recent-user-challenges'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_challenges')
+        .select(`
+          *,
+          challenges (title, category, difficulty)
+        `)
+        .eq('user_id', user?.id)
+        .order('completion_date', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user
+  });
+
+  // Get user profile for focus area
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
+  });
+
+  const streak = streakData || { current_streak: 0, longest_streak: 0 };
+  const currentDay = totalChallenges + 1;
+  const focusArea = userProfile?.preferred_track || "Mindset";
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation isAuthenticated={isAuthenticated} userName={userName} />
+      <Navigation isAuthenticated={!!user} userName={user?.user_metadata?.full_name} />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
-            Your Progress
+            {userName}'s Progress
           </h1>
           <p className="text-muted-foreground">
             Track your journey and celebrate your wins
@@ -53,7 +136,7 @@ const ProgressPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-success mb-1">
-                    {progressData.currentStreak} days
+                    {streak.current_streak} days
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Keep it going! You're on fire 🔥
@@ -70,7 +153,7 @@ const ProgressPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-primary mb-1">
-                    {progressData.bestStreak} days
+                    {streak.longest_streak} days
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Personal record to beat
@@ -87,7 +170,7 @@ const ProgressPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-accent mb-1">
-                    {progressData.currentDay}
+                    {currentDay}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Days on your journey
@@ -101,7 +184,7 @@ const ProgressPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground mb-1">
-                    {progressData.completionRate}%
+                    {completionRate}%
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Challenges completed
@@ -117,29 +200,31 @@ const ProgressPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentChallenges.map((challenge) => (
+                  {recentChallenges.map((challenge, index) => (
                     <div
-                      key={challenge.day}
+                      key={challenge.id}
                       className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                          {challenge.day}
+                          {totalChallenges - index}
                         </div>
                         <div>
-                          <h4 className="font-medium">{challenge.title}</h4>
+                          <h4 className="font-medium">
+                            {challenge.custom_title || challenge.challenges?.title || "Challenge"}
+                          </h4>
                           <div className="flex items-center space-x-2 mt-1">
                             <Badge 
-                              variant={challenge.difficulty === 'beginner' ? 'secondary' : 'default'}
-                              className="text-xs"
+                              variant={challenge.challenges?.difficulty === '1' || challenge.challenges?.difficulty === '2' ? 'secondary' : 'default'}
+                              className="text-xs capitalize"
                             >
-                              {challenge.difficulty}
+                              {challenge.challenges?.category || challenge.custom_category || "General"}
                             </Badge>
                           </div>
                         </div>
                       </div>
                       <div className="text-xl">
-                        {challenge.completed ? "✅" : "⏸️"}
+                        {challenge.status === 'completed' ? "✅" : challenge.status === 'snoozed' ? "⏸️" : "❌"}
                       </div>
                     </div>
                   ))}
@@ -159,8 +244,8 @@ const ProgressPage = () => {
               </CardHeader>
               <CardContent>
                 <ProgressCard 
-                  day={progressData.currentDay}
-                  streak={progressData.currentStreak}
+                  day={currentDay}
+                  streak={streak.current_streak}
                   userName={userName}
                 />
               </CardContent>

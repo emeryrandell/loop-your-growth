@@ -174,21 +174,19 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
         </div>
       </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 mt-4">
-          <Button onClick={handleDownload} variant="outline" size="sm" className="flex-1">
-            <Download className="h-4 w-4 mr-1" />
+        <div className="flex flex-col gap-2 mt-4">
+          <Button onClick={handleDownload} variant="outline" size="sm" className="w-full">
+            <Download className="h-4 w-4 mr-2" />
             Download PNG
           </Button>
-          <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="flex-1">
-            <Copy className="h-4 w-4 mr-1" />
+          <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="w-full">
+            <Copy className="h-4 w-4 mr-2" />
             Copy to Clipboard
           </Button>
-          {navigator.share && (
-            <Button onClick={handleShare} variant="outline" size="sm" className="flex-1">
-              <Share2 className="h-4 w-4 mr-1" />
-              Share
-            </Button>
-          )}
+          <Button onClick={handleShare} variant="outline" size="sm" className="w-full">
+            <Share2 className="h-4 w-4 mr-2" />
+            Share Progress
+          </Button>
         </div>
       
       <div className="text-center">

@@ -13,6 +13,8 @@ import TrainerOnboarding from "./TrainerOnboarding";
 import ProgressCard from "./ProgressCard";
 import ChallengeActionModal from "./ChallengeActionModal";
 import { useToast } from "@/hooks/use-toast";
+import AddNoteModal from "./AddNoteModal";
+import CreateChallengeModal from "./CreateChallengeModal";
 
 const NewDashboard = () => {
   const { user } = useAuth();
@@ -222,7 +224,7 @@ const NewDashboard = () => {
               </span>
             </div>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
             <User className="h-4 w-4 mr-2" />
             Profile
           </Button>
@@ -384,13 +386,15 @@ const NewDashboard = () => {
                 </CardContent>
               </Card>
               
-              <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer">
-                <CardContent className="p-4 text-center">
-                  <Calendar className="h-8 w-8 text-accent mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Add a Note</h3>
-                  <p className="text-xs text-muted-foreground">Reflect on your day</p>
-                </CardContent>
-              </Card>
+              <AddNoteModal>
+                <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <StickyNote className="h-8 w-8 text-accent mx-auto mb-2" />
+                    <h3 className="font-semibold mb-1">Add a Note</h3>
+                    <p className="text-xs text-muted-foreground">Reflect on your day</p>
+                  </CardContent>
+                </Card>
+              </AddNoteModal>
               
               <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer" onClick={() => navigate('/history')}>
                 <CardContent className="p-4 text-center">
@@ -530,6 +534,16 @@ const NewDashboard = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Upgrade Premium
               </Button>
+
+              <CreateChallengeModal>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your Own Challenge
+                </Button>
+              </CreateChallengeModal>
               </CardContent>
             </Card>
 

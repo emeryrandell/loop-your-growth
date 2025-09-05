@@ -25,17 +25,20 @@ const AITrainerChat = () => {
 
   // Fetch conversation history
   const { data: messages = [] } = useQuery({
-    queryKey: ['trainer-messages'],
+    queryKey: ['trainer-messages', user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('trainer_messages')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
       
       if (error) throw error;
       return data as Message[];
     },
-    enabled: !!user
+    enabled: !!user?.id
   });
 
   // Send message mutation
@@ -56,7 +59,7 @@ const AITrainerChat = () => {
     },
     onError: (error: any) => {
       console.error('AI Trainer error:', error);
-      toast.error("Couldn't send message. Please try again.");
+      toast.error("Couldn't send message. Please check if OpenAI API key is configured and try again.");
       setIsLoading(false);
     }
   });

@@ -11,10 +11,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTrainer } from "@/hooks/useTrainer";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const SettingsPage = () => {
   const { user } = useAuth();
   const { trainerSettings, subscription } = useTrainer();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [profileData, setProfileData] = useState({
     fullName: user?.user_metadata?.full_name || '',
@@ -63,21 +68,101 @@ const SettingsPage = () => {
     }
   };
 
-  const handleSaveProfile = () => {
-    // TODO: Save profile changes
-    console.log('Saving profile:', profileData);
-  };
-
-  const handleSaveTrainer = () => {
-    // TODO: Save trainer preferences
-    console.log('Saving trainer prefs:', trainerPrefs);
-  };
-
-  const handleResetProgress = () => {
-    // TODO: Reset user progress
-    if (confirm('Are you sure you want to restart your challenge journey? This will reset your streak and progress.')) {
-      console.log('Resetting progress...');
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: profileData.fullName,
+          email: profileData.email
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Profile updated!",
+        description: "Your profile information has been saved.",
+      });
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save profile. Please try again.",
+        variant: "destructive"
+      });
     }
+  };
+
+  const handleSaveTrainer = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('trainer_settings')
+        .upsert({
+          user_id: user.id,
+          time_budget: trainerPrefs.timeBudget,
+          difficulty_preference: trainerPrefs.difficultyPreference,
+          focus_areas: trainerPrefs.focusAreas,
+          goals: trainerPrefs.goals,
+          constraints: trainerPrefs.constraints
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Trainer updated!",
+        description: "Your trainer preferences have been saved.",
+      });
+    } catch (error) {
+      console.error('Failed to save trainer settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save trainer preferences. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleResetProgress = async () => {
+    if (!user?.id) return;
+    
+    if (confirm('Are you sure you want to restart your challenge journey? This will reset your streak and progress.')) {
+      try {
+        // Reset streak
+        await supabase
+          .from('streaks')
+          .update({
+            current_streak: 0,
+            longest_streak: 0,
+            last_completion_date: null
+          })
+          .eq('user_id', user.id);
+        
+        toast({
+          title: "Progress reset",
+          description: "Your journey has been reset. Time for a fresh start!",
+        });
+      } catch (error) {
+        console.error('Failed to reset progress:', error);
+        toast({
+          title: "Error",
+          description: "Failed to reset progress. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleCancelSubscription = () => {
+    // Demo functionality
+    toast({
+      title: "Demo Mode",
+      description: "This would cancel your subscription in the full version.",
+    });
   };
 
   return (
@@ -281,14 +366,12 @@ const SettingsPage = () => {
                 )}
                 
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/pricing')}>
                     {subscription?.status === 'active' ? 'Manage Subscription' : 'Upgrade to Premium'}
                   </Button>
-                  {subscription?.status === 'active' && (
-                    <Button variant="outline" size="sm">
-                      Cancel Subscription
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" onClick={handleCancelSubscription}>
+                    Cancel Subscription
+                  </Button>
                 </div>
               </CardContent>
             </Card>
