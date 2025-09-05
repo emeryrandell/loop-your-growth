@@ -52,8 +52,14 @@ const AITrainerChat = () => {
       return data;
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['trainer-messages'] });
       queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+      queryClient.invalidateQueries({ queryKey: ['challenge-history'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-user-challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['total-challenges-completed'] });
+      queryClient.invalidateQueries({ queryKey: ['user-completion-rate'] });
+      queryClient.invalidateQueries({ queryKey: ['user-notes'] });
       setMessage("");
       setIsLoading(false);
     },
