@@ -105,6 +105,30 @@ const NewDashboard = () => {
     enabled: !!user
   });
 
+  const completionRate = useQuery({
+    queryKey: ['completion-rate'],
+    queryFn: async () => {
+      const { count: completed, error: completedError } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .eq('status', 'completed');
+
+      const { count: total, error: totalError } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id);
+      
+      if (completedError || totalError) return 0;
+      
+      const completedCount = completed || 0;
+      const totalCount = total || 0;
+      
+      return totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    },
+    enabled: !!user
+  });
+
   // Get current day and streak data
   const { data: currentDay = 1 } = useQuery({
     queryKey: ['current-day'],
@@ -437,24 +461,75 @@ const NewDashboard = () => {
                 <CardTitle className="text-lg">Your Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Current Streak</span>
-                  <span className="font-semibold text-success">{streak.current_streak} days</span>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-primary">
+                  {streakData?.current_streak || 0}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Best Streak</span>
-                  <span className="font-semibold text-primary">{streak.longest_streak} days</span>
+                <div className="text-sm text-muted-foreground">Current Streak</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold">
+                  {streakData?.longest_streak || 0}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Days</span>
-                  <span className="font-semibold">{currentDay - 1}</span>
+                <div className="text-sm text-muted-foreground">Best Streak</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold">
+                  {totalChallenges.data || 0}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Focus Areas</span>
-                  <span className="font-semibold capitalize">
-                    {trainerSettings?.focus_areas?.join(', ') || 'Mindset'}
-                  </span>
+                <div className="text-sm text-muted-foreground">Total Days</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold">
+                  {completionRate.data || 0}%
                 </div>
+                <div className="text-sm text-muted-foreground">Completion Rate</div>
+              </Card>
+            </div>
+
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium">Recent Challenges</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/history')}
+                  >
+                    View All
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {recentChallenges.length > 0 ? recentChallenges.map((challenge, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                      <span className="text-sm">
+                        {challenge.custom_title || challenge.challenges?.title || 'Challenge'}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {challenge.custom_category || challenge.challenges?.category || 'General'}
+                        </Badge>
+                        <Badge variant="default" className="text-xs">
+                          ✅
+                        </Badge>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p className="text-sm">No completed challenges yet</p>
+                      <p className="text-xs">Complete your first challenge to see it here!</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              <Button
+                variant="outline"
+                onClick={() => navigate('/pricing')}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Upgrade Premium
+              </Button>
               </CardContent>
             </Card>
 
@@ -501,14 +576,14 @@ const NewDashboard = () => {
       </div>
 
       {/* Challenge Action Modal */}
-      <ChallengeActionModal
-        open={showActionModal}
-        onOpenChange={setShowActionModal}
-        challenge={todayChallenge}
-        onComplete={handleCompleteChallenge}
-        onSwap={handleSwapChallenge}
-        onSnooze={handleSnoozeChallenge}
-      />
+        <ChallengeActionModal
+          open={showActionModal}
+          onOpenChange={setShowActionModal}
+          challenge={todayChallenge}
+          onComplete={handleCompleteChallenge}
+          onSwap={handleSwapChallenge}
+          onSnooze={handleSnoozeChallenge}
+        />
     </div>
   );
 };
