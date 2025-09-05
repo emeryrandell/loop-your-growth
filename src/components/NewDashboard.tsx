@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Flame, Calendar, Share2, Settings, History, BarChart3, User, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,10 +22,7 @@ const NewDashboard = () => {
     canAccessPaidFeatures
   } = useTrainer();
   
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  useEffect(() => {
-    setShowOnboarding(!isOnboardingComplete);
-  }, [isOnboardingComplete]);
+  const showOnboarding = false;
   const [feedback, setFeedback] = useState<'too_easy' | 'just_right' | 'too_hard' | null>(null);
 
   // Get user's streak
@@ -67,7 +64,7 @@ const NewDashboard = () => {
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-background">
-        <TrainerOnboarding onComplete={(data) => completeOnboarding.mutate(data, { onSuccess: () => setShowOnboarding(false) })} />
+        <TrainerOnboarding onComplete={(data) => completeOnboarding.mutate(data)} />
       </div>
     );
   }
