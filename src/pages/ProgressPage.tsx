@@ -27,7 +27,7 @@ const ProgressPage = () => {
     enabled: !!user
   });
 
-  // Calculate total challenges completed
+  // Calculate total challenges completed (excluding notes)
   const { data: totalChallenges = 0 } = useQuery({
     queryKey: ['total-challenges-completed'],
     queryFn: async () => {
@@ -35,7 +35,8 @@ const ProgressPage = () => {
         .from('user_challenges')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user?.id)
-        .eq('status', 'completed');
+        .eq('status', 'completed')
+        .neq('status', 'note'); // Exclude notes
       
       if (error) throw error;
       return count || 0;
@@ -43,7 +44,7 @@ const ProgressPage = () => {
     enabled: !!user
   });
 
-  // Calculate completion rate
+  // Calculate completion rate (excluding notes)
   const { data: completionRate = 0 } = useQuery({
     queryKey: ['user-completion-rate'],
     queryFn: async () => {
@@ -51,12 +52,14 @@ const ProgressPage = () => {
         .from('user_challenges')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user?.id)
-        .eq('status', 'completed');
+        .eq('status', 'completed')
+        .neq('status', 'note'); // Exclude notes
 
       const { count: total, error: totalError } = await supabase
         .from('user_challenges')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id);
+        .eq('user_id', user?.id)
+        .neq('status', 'note'); // Exclude notes from total count too
       
       if (completedError || totalError) return 0;
       
@@ -68,7 +71,7 @@ const ProgressPage = () => {
     enabled: !!user
   });
 
-  // Fetch recent challenges
+  // Fetch recent completed challenges (excluding notes)
   const { data: recentChallenges = [] } = useQuery({
     queryKey: ['recent-user-challenges'],
     queryFn: async () => {
@@ -79,6 +82,9 @@ const ProgressPage = () => {
           challenges (title, category, difficulty)
         `)
         .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .neq('status', 'note') // Exclude notes
+        .not('completion_date', 'is', null) // Only challenges with completion dates
         .order('completion_date', { ascending: false })
         .limit(5);
       

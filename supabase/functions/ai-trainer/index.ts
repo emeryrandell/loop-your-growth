@@ -90,30 +90,50 @@ Guidelines:
       systemPrompt += '\n\nThe user is providing feedback on a completed challenge. Use this to update their preferences and provide encouragement.';
     }
 
-    // Call OpenAI API
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message || 'Hello!' }
-        ],
-        max_tokens: 500,
-        temperature: 0.7
-      }),
-    });
+    // Get OpenAI API key (try multiple possible secret names)
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('Looped');
+    
+    if (!openaiApiKey) {
+      console.log('No OpenAI API key found in secrets');
+      trainerResponse = "I'm having trouble accessing my AI capabilities right now. Please make sure the OpenAI API key is configured in your project settings and try again.";
+    } else {
+      try {
+        // Call OpenAI API
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: message || 'Hello!' }
+            ],
+            max_tokens: 500,
+            temperature: 0.7
+          }),
+        });
 
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${openaiResponse.statusText}`);
+        if (!openaiResponse.ok) {
+          const errorText = await openaiResponse.text();
+          console.error('OpenAI API error:', openaiResponse.status, errorText);
+          
+          if (openaiResponse.status === 401) {
+            trainerResponse = "It looks like there's an issue with my AI configuration. The API key might be invalid or expired. Please check your OpenAI API key settings.";
+          } else {
+            trainerResponse = "I'm experiencing some technical difficulties right now. Please try again in a moment.";
+          }
+        } else {
+          const data = await openaiResponse.json();
+          trainerResponse = data.choices[0].message.content;
+        }
+      } catch (apiError) {
+        console.error('Error calling OpenAI API:', apiError);
+        trainerResponse = "I'm having trouble connecting to my AI services right now. Please try again in a moment.";
+      }
     }
-
-    const data = await openaiResponse.json();
-    trainerResponse = data.choices[0].message.content;
 
     // Save trainer response
     await supabaseClient.from('trainer_messages').insert({

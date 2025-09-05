@@ -1,4 +1,4 @@
-import { Calendar, Filter, Clock, Trophy, CheckCircle, XCircle, Pause } from "lucide-react";
+import { Calendar, Filter, Clock, Trophy, CheckCircle, XCircle, Pause, StickyNote } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ const HistoryPage = () => {
   const { user } = useAuth();
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
-  // Get challenge history
+  // Get challenge history (excluding notes)
   const { data: challengeHistory = [], isLoading } = useQuery({
     queryKey: ['challenge-history', user?.id],
     queryFn: async () => {
@@ -25,8 +25,29 @@ const HistoryPage = () => {
           challenges (*)
         `)
         .eq('user_id', user.id)
+        .neq('status', 'note') // Exclude notes from challenge history
         .order('created_at', { ascending: false })
         .limit(50);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Get notes separately
+  const { data: notes = [] } = useQuery({
+    queryKey: ['user-notes', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('user_challenges')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'note')
+        .order('created_at', { ascending: false })
+        .limit(20);
       
       if (error) throw error;
       return data || [];
@@ -77,7 +98,11 @@ const HistoryPage = () => {
   };
 
   const filteredHistory = filterCategory 
-    ? challengeHistory.filter(item => item.challenges?.category === filterCategory)
+    ? challengeHistory.filter(item => {
+        // For custom challenges, use custom_category; for regular challenges, use challenges.category
+        const category = item.is_custom ? item.custom_category : item.challenges?.category;
+        return category === filterCategory;
+      })
     : challengeHistory;
 
   const categories = ['energy', 'mindset', 'focus', 'relationships', 'home', 'finance', 'creativity', 'recovery'];
@@ -196,7 +221,7 @@ const HistoryPage = () => {
                 ) : (
                   filteredHistory.map((item) => (
                     <Card key={item.id} className="card-feature hover:shadow-md transition-shadow">
-                      <div className={`absolute top-0 left-0 w-1 h-full ${getCategoryColor(item.challenges?.category || '')}`}></div>
+                      <div className={`absolute top-0 left-0 w-1 h-full ${getCategoryColor(item.is_custom ? item.custom_category || '' : item.challenges?.category || '')}`}></div>
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -204,23 +229,23 @@ const HistoryPage = () => {
                               {getStatusIcon(item.status)}
                               <div className="flex items-center space-x-2">
                                 <Badge variant="outline" className="capitalize">
-                                  {item.challenges?.category || 'Unknown'}
+                                  {item.is_custom ? (item.custom_category || 'Custom') : (item.challenges?.category || 'Unknown')}
                                 </Badge>
                                 <Badge variant="secondary">
-                                  Level {item.challenges?.difficulty || '1'}
+                                  Level {item.is_custom ? '1' : (item.challenges?.difficulty || '1')}
                                 </Badge>
                                 <span className="text-sm text-muted-foreground">
-                                  {item.challenges?.estimated_minutes || 0} min
+                                  {item.is_custom ? (item.custom_time_minutes || 15) : (item.challenges?.estimated_minutes || 0)} min
                                 </span>
                               </div>
                             </div>
                             
                             <h3 className="text-lg font-semibold mb-2">
-                              {item.challenges?.title || 'Unknown Challenge'}
+                              {item.is_custom ? (item.custom_title || 'Custom Challenge') : (item.challenges?.title || 'Unknown Challenge')}
                             </h3>
                             
                             <p className="text-muted-foreground mb-3 text-sm">
-                              {item.challenges?.description || 'No description available'}
+                              {item.is_custom ? (item.custom_description || 'No description available') : (item.challenges?.description || 'No description available')}
                             </p>
                             
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -265,6 +290,46 @@ const HistoryPage = () => {
                   ))
                 )}
               </div>
+
+              {/* Notes Section */}
+              {notes.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                    <StickyNote className="h-5 w-5 mr-2" />
+                    Your Notes
+                  </h2>
+                  <div className="space-y-3">
+                    {notes.map((note) => (
+                      <Card key={note.id} className="card-feature">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                  <StickyNote className="h-3 w-3 mr-1" />
+                                  Note
+                                </Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(note.created_at).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short', 
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+                              
+                              <p className="text-sm text-muted-foreground">
+                                {note.custom_description || note.notes}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

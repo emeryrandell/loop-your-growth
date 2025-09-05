@@ -24,43 +24,24 @@ const AddNoteModal = ({ children }: AddNoteModalProps) => {
 
     setIsSaving(true);
     try {
-      // Get today's challenge if it exists
-      const today = new Date().toISOString().split('T')[0];
-      const { data: todayChallenge } = await supabase
+      // Always create a note entry (not a challenge)
+      await supabase
         .from('user_challenges')
-        .select('id')
-        .eq('user_id', user.id)
-        .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (todayChallenge) {
-        // Update existing challenge with note
-        await supabase
-          .from('user_challenges')
-          .update({ notes: note })
-          .eq('id', todayChallenge.id);
-      } else {
-        // Create a general note entry
-        await supabase
-          .from('user_challenges')
-          .insert({
-            user_id: user.id,
-            is_custom: true,
-            custom_title: "Daily Reflection",
-            custom_description: note,
-            status: 'completed',
-            completion_date: new Date().toISOString(),
-            created_by: 'user',
-            notes: note
-          });
-      }
+        .insert({
+          user_id: user.id,
+          is_custom: true,
+          custom_title: "Note",
+          custom_description: note,
+          custom_category: "Note",
+          status: 'note',
+          completion_date: new Date().toISOString(),
+          created_by: 'note',
+          notes: note
+        });
 
       toast({
         title: "Note saved!",
-        description: "Your reflection has been added to today's progress.",
+        description: "Your note has been added to your history.",
       });
 
       setNote("");
