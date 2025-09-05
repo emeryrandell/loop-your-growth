@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Flame, Calendar, Share2, Settings, History, BarChart3, User, Trophy, Target, Clock, Play } from "lucide-react";
+import { Flame, Calendar, Clock, Share2, StickyNote, TrendingUp, Zap, Award, Settings, Plus, Shuffle, Pause, User, Trophy, Target, Play, History, BarChart3 } from "lucide-react";
+import AITrainerChat from "./AITrainerChat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,41 +33,86 @@ const NewDashboard = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [timeToggle, setTimeToggle] = useState(15);
 
-  // Get user's streak
-  const { data: streak = { current_streak: 0, longest_streak: 0 } } = useQuery({
-    queryKey: ['streak', user?.id],
+  // Fetch user streak data
+  const { data: streakData } = useQuery({
+    queryKey: ['user-streak'],
     queryFn: async () => {
-      if (!user) return { current_streak: 0, longest_streak: 0 };
-      
       const { data, error } = await supabase
         .from('streaks')
         .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user?.id)
+        .single();
       
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || { current_streak: 0, longest_streak: 0 };
+      if (error) throw error;
+      return data;
     },
-    enabled: !!user,
+    enabled: !!user
   });
 
-  // Get current day
-  const { data: currentDay = 1 } = useQuery({
-    queryKey: ['current-day', user?.id],
+  // Fetch progress data for today
+  const { data: todayProgress } = useQuery({
+    queryKey: ['today-progress'],
     queryFn: async () => {
-      if (!user) return 1;
-      
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('user_challenges')
-        .select('id')
-        .eq('user_id', user.id)
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .gte('completion_date', `${today}T00:00:00`)
+        .lte('completion_date', `${today}T23:59:59`);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user
+  });
+
+  // Fetch recent completed challenges
+  const { data: recentChallenges = [] } = useQuery({
+    queryKey: ['recent-challenges'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_challenges')
+        .select(`
+          *,
+          challenges (title, category, difficulty)
+        `)
+        .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .order('completion_date', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user
+  });
+
+  // Calculate stats
+  const totalChallenges = useQuery({
+    queryKey: ['total-challenges'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
         .eq('status', 'completed');
       
       if (error) throw error;
-      return (data?.length || 0) + 1;
+      return count || 0;
     },
-    enabled: !!user,
+    enabled: !!user
   });
+
+  // Get current day and streak data
+  const { data: currentDay = 1 } = useQuery({
+    queryKey: ['current-day'],
+    queryFn: async () => (totalChallenges.data || 0) + 1,
+    enabled: !!user
+  });
+
+  const streak = streakData || { current_streak: 0, longest_streak: 0 };
 
   if (showOnboarding) {
     return (
@@ -179,18 +225,18 @@ const NewDashboard = () => {
             </div>
 
             {/* Today's Challenge - Centerpiece */}
-            {todayChallenge && todayChallenge.challenges && (
+            {todayChallenge && (
               <Card className="card-feature relative border-2 border-primary/20 shadow-glow">
-                <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(todayChallenge.challenges.category)} rounded-l-lg`}></div>
+                <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(todayChallenge.category)} rounded-l-lg`}></div>
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-3">
                         <Badge 
                           variant="outline" 
-                          className={`capitalize text-white border-white ${getCategoryColor(todayChallenge.challenges.category)}`}
+                          className={`capitalize text-white border-white ${getCategoryColor(todayChallenge.category)}`}
                         >
-                          {todayChallenge.challenges.category}
+                          {todayChallenge.category}
                         </Badge>
                         <div className="flex items-center space-x-1">
                           {[5, 15, 30].map((time) => (
@@ -207,27 +253,27 @@ const NewDashboard = () => {
                         </div>
                       </div>
                       <CardTitle className="text-2xl md:text-3xl font-bold mb-2">
-                        {todayChallenge.challenges.title}
+                        {todayChallenge.title}
                       </CardTitle>
                       <p className="text-muted-foreground leading-relaxed">
-                        {todayChallenge.challenges.description}
+                        {todayChallenge.description}
                       </p>
                     </div>
                     <div className="flex flex-col items-center space-y-2">
                       <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                         <Target className="h-6 w-6 text-primary" />
                       </div>
-                      <span className="text-xs text-muted-foreground">Level {todayChallenge.challenges.difficulty}</span>
+                      <span className="text-xs text-muted-foreground">Level {todayChallenge.difficulty}</span>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {todayChallenge.challenges.benefit && (
+                  {todayChallenge.benefit && (
                     <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
                       <div className="flex items-start space-x-2">
                         <span className="text-success text-sm">💡</span>
                         <p className="text-sm font-medium">
-                          <span className="text-success">Why this works:</span> {todayChallenge.challenges.benefit}
+                          <span className="text-success">Why this works:</span> {todayChallenge.benefit}
                         </p>
                       </div>
                     </div>
@@ -381,28 +427,7 @@ const NewDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-secondary/50 rounded-lg p-4">
-                    <p className="text-sm">
-                      {streak.current_streak === 0 
-                        ? "Ready for your first challenge? I've picked something perfect to get you started!"
-                        : streak.current_streak < 3
-                        ? `Great start! I can see you're building momentum. Let's keep this energy going.`
-                        : streak.current_streak < 7
-                        ? `You're finding your rhythm! I'm adjusting challenges based on your feedback.`
-                        : `Amazing consistency! I'm impressed with your dedication. Ready for the next level?`
-                      }
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Adjust Focus
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Give Feedback
-                    </Button>
-                  </div>
-                </div>
+            <AITrainerChat />
               </CardContent>
             </Card>
 

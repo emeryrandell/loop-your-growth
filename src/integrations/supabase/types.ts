@@ -215,6 +215,60 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_memory: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          memory_type: string
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          memory_type: string
+          updated_at?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          memory_type?: string
+          updated_at?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      trainer_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trainer_settings: {
         Row: {
           constraints: string | null
@@ -259,9 +313,16 @@ export type Database = {
           challenge_id: string | null
           completion_date: string | null
           created_at: string
+          created_by: string | null
+          custom_category: string | null
+          custom_description: string | null
+          custom_time_minutes: number | null
+          custom_title: string | null
           feedback: string | null
           id: string
+          is_custom: boolean | null
           notes: string | null
+          scheduled_date: string | null
           status: string | null
           trainer_response: string | null
           updated_at: string
@@ -271,9 +332,16 @@ export type Database = {
           challenge_id?: string | null
           completion_date?: string | null
           created_at?: string
+          created_by?: string | null
+          custom_category?: string | null
+          custom_description?: string | null
+          custom_time_minutes?: number | null
+          custom_title?: string | null
           feedback?: string | null
           id?: string
+          is_custom?: boolean | null
           notes?: string | null
+          scheduled_date?: string | null
           status?: string | null
           trainer_response?: string | null
           updated_at?: string
@@ -283,9 +351,16 @@ export type Database = {
           challenge_id?: string | null
           completion_date?: string | null
           created_at?: string
+          created_by?: string | null
+          custom_category?: string | null
+          custom_description?: string | null
+          custom_time_minutes?: number | null
+          custom_title?: string | null
           feedback?: string | null
           id?: string
+          is_custom?: boolean | null
           notes?: string | null
+          scheduled_date?: string | null
           status?: string | null
           trainer_response?: string | null
           updated_at?: string

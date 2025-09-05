@@ -174,23 +174,22 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Button onClick={handleDownload} variant="outline" className="flex-1 sm:flex-none">
-          <Download className="h-4 w-4 mr-2" />
-          Download PNG
-        </Button>
-        
-        <Button onClick={handleCopyToClipboard} variant="outline" className="flex-1 sm:flex-none">
-          <Copy className="h-4 w-4 mr-2" />
-          Copy to Clipboard
-        </Button>
-        
-        <Button onClick={handleShare} className="btn-hero flex-1 sm:flex-none">
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button>
-      </div>
+        <div className="flex flex-col sm:flex-row gap-2 mt-4">
+          <Button onClick={handleDownload} variant="outline" size="sm" className="flex-1">
+            <Download className="h-4 w-4 mr-1" />
+            Download PNG
+          </Button>
+          <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="flex-1">
+            <Copy className="h-4 w-4 mr-1" />
+            Copy to Clipboard
+          </Button>
+          {navigator.share && (
+            <Button onClick={handleShare} variant="outline" size="sm" className="flex-1">
+              <Share2 className="h-4 w-4 mr-1" />
+              Share
+            </Button>
+          )}
+        </div>
       
       <div className="text-center">
         <p className="text-sm text-muted-foreground">

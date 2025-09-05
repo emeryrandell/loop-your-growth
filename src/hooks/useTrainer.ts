@@ -82,11 +82,46 @@ export function useTrainer() {
 
   // Get today's challenge based on user's preferences and progress
   const { data: todayChallenge, isLoading: challengeLoading } = useQuery({
-    queryKey: ['today-challenge', user?.id, trainerSettings?.focus_areas],
+    queryKey: ['today-challenge'],
     queryFn: async () => {
-      if (!user || !trainerSettings) return null;
+      if (!user?.id) return null;
 
-      // Check for existing pending challenge
+      // Check if user has a pending challenge for today
+      const today = new Date().toISOString().split('T')[0];
+      
+      // First check for custom/scheduled challenges
+      const { data: customChallenge } = await supabase
+        .from('user_challenges')
+        .select(`
+          *,
+          challenges (*)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .or(`scheduled_date.eq.${today},created_at.gte.${today}T00:00:00`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (customChallenge) {
+        // Format custom challenge to match expected structure
+        return {
+          id: customChallenge.id,
+          challenge_id: customChallenge.challenge_id,
+          title: customChallenge.custom_title || customChallenge.challenges?.title,
+          description: customChallenge.custom_description || customChallenge.challenges?.description,
+          category: customChallenge.custom_category || customChallenge.challenges?.category,
+          estimated_minutes: customChallenge.custom_time_minutes || customChallenge.challenges?.estimated_minutes || 15,
+          difficulty: customChallenge.challenges?.difficulty || 'medium',
+          benefit: customChallenge.challenges?.benefit || 'Builds consistency',
+          status: customChallenge.status,
+          user_challenge_id: customChallenge.id,
+          is_custom: customChallenge.is_custom,
+          created_by: customChallenge.created_by
+        };
+      }
+
+      // If no custom challenge, fall back to system challenges
       const { data: existingChallenge } = await supabase
         .from('user_challenges')
         .select(`
@@ -95,79 +130,113 @@ export function useTrainer() {
         `)
         .eq('user_id', user.id)
         .eq('status', 'pending')
+        .gte('created_at', `${today}T00:00:00`)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (existingChallenge) {
-        return existingChallenge;
+        return {
+          ...existingChallenge.challenges,
+          status: existingChallenge.status,
+          user_challenge_id: existingChallenge.id
+        };
       }
 
-      // Get user's current day (number of completed challenges + 1)
-      const { data: completedChallenges } = await supabase
-        .from('user_challenges')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed');
+      // Generate a new challenge based on settings and progress
+      if (!trainerSettings) return null;
 
-      const currentDay = (completedChallenges?.length || 0) + 1;
+      const focusAreas = trainerSettings.focus_areas || ['mindset'];
+      const timeBudget = trainerSettings.time_budget || 15;
+      const difficulty = trainerSettings.difficulty_preference || 3;
 
-      // Get suitable challenge from preferred categories
-      const preferredCategory = trainerSettings.focus_areas[0] || 'mindset';
+      // Get challenge from focus areas
+      let categoryFilter = focusAreas.length > 0 
+        ? focusAreas[Math.floor(Math.random() * focusAreas.length)]
+        : 'mindset';
+
+      // Map internal focus areas to challenge categories
+      const categoryMapping: Record<string, string> = {
+        'mindset': 'Mindset',
+        'energy': 'Energy',
+        'focus': 'Focus',
+        'relationships': 'Relationships',
+        'home': 'Home',
+        'finance': 'Finance',
+        'creativity': 'Creativity',
+        'recovery': 'Recovery'
+      };
       
-      const { data: availableChallenges } = await supabase
+      categoryFilter = categoryMapping[categoryFilter] || 'Mindset';
+
+      const { data: challenges } = await supabase
         .from('challenges')
         .select('*')
-        .eq('category', preferredCategory)
-        .eq('day_number', Math.min(currentDay, 5)) // Limit to available challenges
-        .lte('difficulty', trainerSettings.difficulty_preference.toString())
-        .lte('estimated_minutes', trainerSettings.time_budget);
+        .eq('category', categoryFilter)
+        .lte('estimated_minutes', timeBudget + 5)
+        .order('day_number');
 
-      if (!availableChallenges || availableChallenges.length === 0) {
-        // Fallback to any suitable challenge
-        const { data: fallbackChallenge } = await supabase
+      if (!challenges || challenges.length === 0) {
+        // Fallback to any challenge
+        const { data: allChallenges } = await supabase
           .from('challenges')
           .select('*')
-          .eq('day_number', 1)
-          .eq('category', 'mindset')
-          .maybeSingle();
-
-        if (fallbackChallenge) {
-          const { data: newUserChallenge } = await supabase
+          .lte('estimated_minutes', timeBudget + 5)
+          .order('day_number');
+        
+        if (allChallenges && allChallenges.length > 0) {
+          const randomChallenge = allChallenges[Math.floor(Math.random() * allChallenges.length)];
+          
+          // Create user challenge record
+          const { data: userChallenge } = await supabase
             .from('user_challenges')
             .insert({
               user_id: user.id,
-              challenge_id: fallbackChallenge.id,
-              status: 'pending'
+              challenge_id: randomChallenge.id,
+              status: 'pending',
+              created_by: 'system'
             })
-            .select(`
-              *,
-              challenges (*)
-            `)
+            .select()
             .single();
 
-          return newUserChallenge;
+          return {
+            ...randomChallenge,
+            status: 'pending',
+            user_challenge_id: userChallenge?.id
+          };
         }
-      } else {
-        // Create new challenge from suitable options
-        const selectedChallenge = availableChallenges[0];
-        const { data: newUserChallenge } = await supabase
-          .from('user_challenges')
-          .insert({
-            user_id: user.id,
-            challenge_id: selectedChallenge.id,
-            status: 'pending'
-          })
-          .select(`
-            *,
-            challenges (*)
-          `)
-          .single();
-
-        return newUserChallenge;
+        return null;
       }
 
-      return null;
+      // Select appropriate challenge based on difficulty and user progress
+      const appropriateChallenges = challenges.filter(c => {
+        const challengeDifficulty = c.difficulty === 'easy' ? 2 : c.difficulty === 'hard' ? 4 : 3;
+        return Math.abs(challengeDifficulty - difficulty) <= 1;
+      });
+
+      const selectedChallenge = appropriateChallenges.length > 0 
+        ? appropriateChallenges[Math.floor(Math.random() * appropriateChallenges.length)]
+        : challenges[Math.floor(Math.random() * challenges.length)];
+
+      // Create user challenge record
+      const { data: userChallenge } = await supabase
+        .from('user_challenges')
+        .insert({
+          user_id: user.id,
+          challenge_id: selectedChallenge.id,
+          status: 'pending',
+          created_by: 'system'
+        })
+        .select()
+        .single();
+
+      return {
+        ...selectedChallenge,
+        status: 'pending',
+        user_challenge_id: userChallenge?.id
+      };
     },
-    enabled: !!user && !!trainerSettings,
+    enabled: !!user && !!trainerSettings && !settingsLoading
   });
 
   // Complete trainer onboarding

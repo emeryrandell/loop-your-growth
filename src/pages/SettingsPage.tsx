@@ -250,61 +250,6 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Notifications */}
-            <Card className="card-feature">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Bell className="h-5 w-5 mr-2" />
-                  Notifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Daily Reminder</Label>
-                    <p className="text-sm text-muted-foreground">Get notified about your daily challenge</p>
-                  </div>
-                  <Switch
-                    checked={notifications.dailyReminder}
-                    onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, dailyReminder: checked }))}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Weekly Insights</Label>
-                    <p className="text-sm text-muted-foreground">Receive your weekly progress report</p>
-                  </div>
-                  <Switch
-                    checked={notifications.weeklyInsights}
-                    onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, weeklyInsights: checked }))}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Streak Milestones</Label>
-                    <p className="text-sm text-muted-foreground">Celebrate when you hit streak goals</p>
-                  </div>
-                  <Switch
-                    checked={notifications.streakMilestones}
-                    onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, streakMilestones: checked }))}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Email Updates</Label>
-                    <p className="text-sm text-muted-foreground">Product updates and tips via email</p>
-                  </div>
-                  <Switch
-                    checked={notifications.emailUpdates}
-                    onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, emailUpdates: checked }))}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Subscription */}
             <Card className="card-feature">
               <CardHeader>
