@@ -15,6 +15,9 @@ import ChallengeActionModal from "./ChallengeActionModal";
 import { useToast } from "@/hooks/use-toast";
 import AddNoteModal from "./AddNoteModal";
 import CreateChallengeModal from "./CreateChallengeModal";
+import ShareCardGenerator from "./ShareCardGenerator";
+import DoItNowModal from "./DoItNowModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const NewDashboard = () => {
   const { user } = useAuth();
@@ -33,6 +36,7 @@ const NewDashboard = () => {
   const showOnboarding = false;
   const [feedback, setFeedback] = useState<'too_easy' | 'just_right' | 'too_hard' | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [timeToggle, setTimeToggle] = useState(15);
 
   // Fetch user streak data
@@ -312,11 +316,19 @@ const NewDashboard = () => {
                       </div>
                       <h4 className="text-xl font-semibold text-success">Challenge Complete!</h4>
                       <p className="text-muted-foreground">
-                        Excellent work! Your Trainer is preparing tomorrow's challenge.
+                        Excellent work! Your coach is preparing tomorrow's challenge.
                       </p>
                       <div className="flex justify-center space-x-2 mt-4">
-                        <Button variant="outline" size="sm">Add Note</Button>
-                        <Button variant="outline" size="sm">Share Win</Button>
+                        <AddNoteModal>
+                          <Button variant="outline" size="sm">Add Note</Button>
+                        </AddNoteModal>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowShareCard(true)}
+                        >
+                          Share Win
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -336,7 +348,7 @@ const NewDashboard = () => {
                           onClick={() => {
                             toast({
                               title: "Can't do this right now?",
-                              description: "No worries! Your trainer will suggest an alternative or you can snooze it.",
+                              description: "No worries! Your coach will suggest an alternative or you can snooze it.",
                             });
                           }}
                         >
@@ -378,7 +390,10 @@ const NewDashboard = () => {
 
             {/* Quick Actions */}
             <div className="grid md:grid-cols-3 gap-4">
-              <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer" onClick={() => navigate('/progress')}>
+              <Card 
+                className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer" 
+                onClick={() => setShowShareCard(true)}
+              >
                 <CardContent className="p-4 text-center">
                   <Share2 className="h-8 w-8 text-primary mx-auto mb-2" />
                   <h3 className="font-semibold mb-1">Generate Share Card</h3>
@@ -589,15 +604,41 @@ const NewDashboard = () => {
         </div>
       </div>
 
-      {/* Challenge Action Modal */}
-        <ChallengeActionModal
-          open={showActionModal}
-          onOpenChange={setShowActionModal}
-          challenge={todayChallenge}
-          onComplete={handleCompleteChallenge}
-          onSwap={handleSwapChallenge}
-          onSnooze={handleSnoozeChallenge}
-        />
+      {/* Modals */}
+      <DoItNowModal
+        open={showActionModal}
+        onOpenChange={setShowActionModal}
+        challenge={todayChallenge ? {
+          ...todayChallenge,
+          difficulty: typeof todayChallenge.difficulty === 'string' ? 
+            parseInt(todayChallenge.difficulty) || 3 : 
+            todayChallenge.difficulty
+        } : {
+          id: '',
+          title: 'Default Challenge',
+          description: 'Complete today\'s 1% improvement',
+          category: 'mindset',
+          difficulty: 3,
+          estimated_minutes: timeToggle,
+        }}
+        timeSelected={timeToggle}
+        onComplete={handleCompleteChallenge}
+      />
+
+      {/* Share Card Dialog */}
+      <Dialog open={showShareCard} onOpenChange={setShowShareCard}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Share Your Progress</DialogTitle>
+          </DialogHeader>
+          <ShareCardGenerator
+            type="daily"
+            challengeTitle={todayChallenge?.title}
+            category={todayChallenge?.category}
+            onClose={() => setShowShareCard(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
