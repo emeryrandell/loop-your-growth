@@ -65,7 +65,14 @@ const AITrainerChat = () => {
     },
     onError: (error: any) => {
       console.error('AI Trainer error:', error);
-      toast.error("Couldn't send message. Please check if OpenAI API key is configured and try again.");
+      
+      // Show helpful error message based on the error type
+      let errorMessage = "Couldn't send message. Please try again.";
+      if (error.message?.includes('Edge Function returned a non-2xx status code')) {
+        errorMessage = "Your coach needs an OpenAI API key to respond. Please add one in project settings.";
+      }
+      
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   });
@@ -84,13 +91,17 @@ const AITrainerChat = () => {
     }
   };
 
+  // Remove auto-scroll to avoid annoying UX
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Only scroll on first load, not on every message
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length === 1) {
+      scrollToBottom();
+    }
+  }, [messages.length]);
 
   // Auto-greet new users
   useEffect(() => {
@@ -105,18 +116,20 @@ const AITrainerChat = () => {
   }, [user, messages.length]);
 
   return (
-    <Card className="h-full flex flex-col">
-      <div className="p-4 border-b">
+    <Card className="card-soft flex flex-col h-96">
+      <div className="p-3 border-b border-border/30">
         <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Your AI Trainer</h3>
+          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-xs">🎯</span>
+          </div>
+          <h3 className="font-medium text-sm">Your Coach</h3>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your personal 1% improvement coach
+        <p className="text-xs text-muted-foreground mt-1">
+          Small wins, zero shame
         </p>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-3">
         <div className="space-y-4">
           {messages.map((msg) => (
             <div

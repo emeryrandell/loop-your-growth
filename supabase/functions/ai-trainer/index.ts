@@ -211,9 +211,15 @@ Remember: You're their dedicated coach helping them loop forward 1% each day. Ke
 
   } catch (error) {
     console.error('Error in ai-trainer function:', error);
+    
+    // Return a more helpful error message
+    const errorMessage = error.message === 'OpenAI API key not configured' 
+      ? "I need an OpenAI API key to work properly. Please add one in your project settings under 'Secrets'."
+      : "I'm having trouble connecting right now. Please try again in a moment!";
+    
     return new Response(JSON.stringify({ 
       error: error.message,
-      response: "I'm having trouble connecting right now. Please try again in a moment!"
+      response: errorMessage
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

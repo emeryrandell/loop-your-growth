@@ -8,46 +8,50 @@ All colors MUST be HSL for proper theming.
 
 @layer base {
   :root {
-    /* Brand Colors - Warm, motivational palette */
-    --background: 45 15% 97%;
-    --foreground: 215 25% 15%;
+    /* Looped Brand Colors - Calm Progress Aesthetic */
+    --background: 44 11% 98%; /* Paper #FAFAF7 */
+    --foreground: 215 25% 8%; /* Ink #111827 */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 215 25% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 215 25% 8%;
 
-    /* Primary - Energizing coral/orange for CTAs */
-    --primary: 14 90% 60%;
+    /* Primary - Sprout Green (progress) */
+    --primary: 158 64% 52%; /* Sprout #10B981 */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 14 95% 65%;
+    --primary-glow: 158 64% 58%;
 
-    /* Secondary - Warm cream tones */
-    --secondary: 45 20% 94%;
-    --secondary-foreground: 215 25% 25%;
+    /* Secondary - Calm Blue (focus) */
+    --secondary: 219 66% 64%; /* Calm Blue #5B8DEF */
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted - Soft neutrals */
-    --muted: 45 10% 90%;
-    --muted-foreground: 215 15% 50%;
+    /* Muted - Neutral grays */
+    --muted: 210 16% 93%; /* #E5E7EB */
+    --muted-foreground: 210 11% 71%; /* #9CA3AF */
 
-    /* Accent - Deep navy for contrast */
-    --accent: 215 85% 25%;
+    /* Accent - Lavender */
+    --accent: 266 85% 58%; /* Lavender #A78BFA */
     --accent-foreground: 0 0% 100%;
 
-    /* Success - Fresh green for streaks */
-    --success: 142 76% 36%;
+    /* Success - Same as primary for consistency */
+    --success: 158 64% 52%; /* Sprout #10B981 */
     --success-foreground: 0 0% 100%;
-    --success-glow: 142 80% 45%;
+    --success-glow: 158 64% 58%;
+
+    /* Support - Peach */
+    --peach: 326 77% 78%; /* Peach #F9A8D4 */
+    --peach-foreground: 215 25% 8%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 15% 85%;
-    --input: 45 15% 90%;
-    --ring: 14 90% 60%;
+    --border: 210 16% 93%; /* #E5E7EB */
+    --input: 210 16% 93%;
+    --ring: 158 64% 52%;
 
-    --radius: 0.75rem;
+    --radius: 1.25rem; /* rounded-2xl for softer feel */
     
     /* Gradients - Warm, motivational gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
@@ -129,13 +133,15 @@ All colors MUST be HSL for proper theming.
     @apply bg-background text-foreground font-sans;
   }
 
-  /* Typography - Elegant serif headlines, clean sans-serif body */
+  /* Typography - Looped Brand Fonts (System Fallbacks) */
   .font-display {
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: ui-serif, 'Times New Roman', 'Georgia', serif;
+    font-variation-settings: "opsz" auto;
   }
   
   .font-sans {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-feature-settings: "tnum" on; /* Tabular numbers for consistent widths */
   }
 }
 
@@ -158,21 +164,20 @@ All colors MUST be HSL for proper theming.
            transition-all duration-200;
   }
 
-  /* Card Styles */
-  .card-gradient {
-    background: var(--gradient-card);
-    @apply border border-border/50;
-    box-shadow: 0 2px 20px -5px hsl(var(--foreground) / 0.1);
+  /* Card Styles - Looped Soft & Airy */
+  .card-soft {
+    @apply bg-card border border-border rounded-2xl;
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
   }
   
   .card-feature {
-    @apply bg-card border border-border/30 hover:border-primary/20
-           transition-all duration-300
-           backdrop-blur-sm;
+    @apply bg-card border border-border/50 hover:border-primary/30 rounded-2xl
+           transition-all duration-200 ease-out;
   }
   
   .card-feature:hover {
-    box-shadow: 0 2px 20px -5px hsl(var(--foreground) / 0.1);
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
   }
 
   /* Progress & Streak Styles */

@@ -18,6 +18,7 @@ import CreateChallengeModal from "./CreateChallengeModal";
 import ShareCardGenerator from "./ShareCardGenerator";
 import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import InProgressChallenges from "./InProgressChallenges";
 
 const NewDashboard = () => {
   const { user } = useAuth();
@@ -214,8 +215,8 @@ const NewDashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
-              {getGreeting()} — here's your 1% for today.
+            <h1 className="font-display text-3xl md:text-4xl font-bold mb-2 text-foreground">
+              {getGreeting()} — ready for your 1%?
             </h1>
             <div className="flex items-center space-x-4 text-muted-foreground">
               <span className="flex items-center">
@@ -234,22 +235,25 @@ const NewDashboard = () => {
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Welcome Strip */}
-            <div className="bg-gradient-to-r from-primary/10 to-success/10 rounded-2xl p-6 text-center">
-              <h2 className="text-xl md:text-2xl font-semibold mb-2">
-                Hey {user?.user_metadata?.full_name?.split(' ')[0] || 'there'} — Day {currentDay}. Ready for today's 1%?
+          <div className="lg:col-span-3 space-y-6">
+            {/* Calm Welcome Strip */}
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 text-center border border-primary/10">
+              <h2 className="font-display text-2xl md:text-3xl font-medium mb-3 text-foreground">
+                1% Better, Today
               </h2>
-              <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-1">
+              <p className="text-muted-foreground mb-4 text-lg">
+                Small wins, zero shame. Day {currentDay} of your journey.
+              </p>
+              <div className="flex items-center justify-center space-x-6 text-sm">
+                <div className="flex items-center space-x-2 bg-success/10 px-3 py-1 rounded-full">
                   <Flame className="h-4 w-4 text-success" />
-                  <span>{streak.current_streak} day streak</span>
+                  <span className="font-medium">{streak.current_streak} day streak</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <Trophy className="h-4 w-4 text-warning" />
-                  <span>Best: {streak.longest_streak} days</span>
+                <div className="flex items-center space-x-2 bg-accent/10 px-3 py-1 rounded-full">
+                  <Trophy className="h-4 w-4 text-accent" />
+                  <span className="font-medium">Best: {streak.longest_streak}</span>
                 </div>
               </div>
             </div>
@@ -459,20 +463,8 @@ const NewDashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Your Trainer */}
-            <Card className="card-feature">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-success rounded-full flex items-center justify-center mr-2">
-                    <span className="text-xs font-bold text-white">∞</span>
-                  </div>
-                  Your Trainer
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
             <AITrainerChat />
-              </CardContent>
-            </Card>
+            <InProgressChallenges />
 
             {/* Quick Stats */}
             <Card className="card-feature">
