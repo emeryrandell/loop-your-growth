@@ -188,16 +188,16 @@ const NewDashboard = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      energy: 'bg-green-500',
-      mindset: 'bg-purple-500',
-      focus: 'bg-blue-500',
-      relationships: 'bg-pink-500',
-      home: 'bg-orange-500',
-      finance: 'bg-emerald-500',
-      creativity: 'bg-yellow-500',
-      recovery: 'bg-indigo-500',
+      energy: 'bg-success',
+      mindset: 'bg-accent',
+      focus: 'bg-secondary',
+      relationships: 'bg-primary',
+      home: 'bg-success',
+      finance: 'bg-secondary',
+      creativity: 'bg-accent',
+      recovery: 'bg-primary',
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-500';
+    return colors[category as keyof typeof colors] || 'bg-muted';
   };
 
   const getGreeting = () => {
@@ -268,7 +268,7 @@ const NewDashboard = () => {
                       <div className="flex items-center space-x-2 mb-3">
                         <Badge 
                           variant="outline" 
-                          className={`capitalize text-white border-white ${getCategoryColor(todayChallenge.category)}`}
+                          className={`capitalize ${getCategoryColor(todayChallenge.category)} text-white border-transparent`}
                         >
                           {todayChallenge.category}
                         </Badge>

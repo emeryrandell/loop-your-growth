@@ -32,25 +32,38 @@ const InProgressChallenges = () => {
   });
 
   const handleStartChallenge = async (challengeId: string) => {
-    const { error } = await supabase
-      .from('user_challenges')
-      .update({ status: 'in_progress' })
-      .eq('id', challengeId);
+    console.log('Starting challenge:', challengeId);
+    
+    try {
+      const { error } = await supabase
+        .from('user_challenges')
+        .update({ status: 'in_progress' })
+        .eq('id', challengeId);
 
-    if (error) {
+      if (error) {
+        console.error('Challenge start error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to start challenge. Please try again.",
+          variant: "destructive"
+        });
+      } else {
+        console.log('Challenge started successfully');
+        // Invalidate queries to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ['in-progress-challenges'] });
+        queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+        
+        toast({
+          title: "Challenge started!",
+          description: "Let's do this! 💪"
+        });
+      }
+    } catch (error) {
+      console.error('Unexpected error starting challenge:', error);
       toast({
         title: "Error",
-        description: "Failed to start challenge. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
-      });
-    } else {
-      // Invalidate queries to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ['in-progress-challenges'] });
-      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
-      
-      toast({
-        title: "Challenge started!",
-        description: "Let's do this! 💪"
       });
     }
   };

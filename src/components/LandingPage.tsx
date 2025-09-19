@@ -48,7 +48,7 @@ const LandingPage = () => {
             <img 
               src={heroImage} 
               alt="Looped - 1% Better Every Day" 
-              className="w-32 h-32 mx-auto rounded-2xl shadow-glow animate-float"
+              className="w-32 h-32 mx-auto rounded-2xl shadow-glow"
             />
           </div>
           <h1 className="font-display text-5xl md:text-7xl font-bold text-foreground mb-6 animate-fade-in-up">
