@@ -38,3 +38,6 @@ enable_signup = true
 
 [functions.ai-trainer]
 verify_jwt = true
+
+[functions.demo-challenge]
+verify_jwt = false

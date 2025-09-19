@@ -32,53 +32,54 @@ const ShareCardGenerator = ({ type = 'daily', challengeTitle, category, onClose 
     canvas.height = 1080;
 
     try {
-      // Background gradient
+      // Background gradient using the new color scheme
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#ff7849'); // primary
-      gradient.addColorStop(1, '#ff8c5a'); // primary-glow
+      gradient.addColorStop(0, '#10B981'); // sprout
+      gradient.addColorStop(1, '#5B8DEF'); // calm
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Semi-transparent overlay
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.fillStyle = 'rgba(250, 250, 247, 0.1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Main content area
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillStyle = '#FAFAF7'; // paper
       ctx.roundRect(60, 150, canvas.width - 120, canvas.height - 300, 20);
       ctx.fill();
 
       // Header section
-      ctx.fillStyle = '#2d3748';
-      ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#111827'; // ink
+      ctx.font = 'bold 72px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       
       if (type === 'daily') {
-        ctx.fillText('Day ' + currentDay, canvas.width / 2, 280);
-        ctx.font = '48px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#4a5568';
+        const dayText = currentDay > 0 ? `Day ${currentDay}` : 'Demo Day 1';
+        ctx.fillText(dayText, canvas.width / 2, 280);
+        ctx.font = '48px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#9CA3AF'; // muted
         ctx.fillText('1% Better Today', canvas.width / 2, 340);
       } else if (type === 'weekly') {
         ctx.fillText('Week Complete', canvas.width / 2, 280);
-        ctx.font = '48px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#4a5568';
+        ctx.font = '48px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#9CA3AF';
         ctx.fillText(`${completionRate}% Success Rate`, canvas.width / 2, 340);
       } else if (type === 'milestone') {
         ctx.fillText('Milestone!', canvas.width / 2, 280);
-        ctx.font = '48px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#4a5568';
+        ctx.font = '48px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#9CA3AF';
         ctx.fillText(`${streak?.current_streak} Day Streak`, canvas.width / 2, 340);
       }
 
       // Challenge info (for daily cards)
       if (type === 'daily' && challengeTitle) {
-        ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 36px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#111827'; // ink
         ctx.fillText(challengeTitle, canvas.width / 2, 450);
         
         if (category) {
-          ctx.font = '32px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillStyle = '#ff7849';
+          ctx.font = '32px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillStyle = '#10B981'; // sprout
           ctx.fillText(category.toUpperCase(), canvas.width / 2, 500);
         }
       }
@@ -86,37 +87,38 @@ const ShareCardGenerator = ({ type = 'daily', challengeTitle, category, onClose 
       // Stats section
       const statY = type === 'daily' ? 600 : 450;
       
-      // Streak
-      ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#38a169';
-      ctx.fillText(`${streak?.current_streak || 0}`, canvas.width / 2, statY);
-      ctx.font = '36px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#4a5568';
-      ctx.fillText('Day Streak', canvas.width / 2, statY + 50);
+      // Streak or demo indicator
+      ctx.font = 'bold 64px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#10B981'; // sprout
+      const streakValue = currentDay > 0 ? (streak?.current_streak || 0) : 1;
+      ctx.fillText(`${streakValue}`, canvas.width / 2, statY);
+      ctx.font = '36px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#9CA3AF'; // muted
+      const streakLabel = currentDay > 0 ? 'Day Streak' : 'Demo Complete';
+      ctx.fillText(streakLabel, canvas.width / 2, statY + 50);
 
       // Total challenges (smaller text)
-      if (type !== 'daily') {
-        ctx.font = '28px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#718096';
+      if (type !== 'daily' && currentDay > 0) {
+        ctx.font = '28px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#9CA3AF';
         ctx.fillText(`${totalChallenges} Challenges Completed`, canvas.width / 2, statY + 120);
       }
 
       // Footer
-      ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#ff7849';
+      ctx.font = 'bold 32px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#10B981'; // sprout
       ctx.fillText('#LoopedLife', canvas.width / 2, canvas.height - 180);
       
-      ctx.font = '28px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillStyle = '#4a5568';
+      ctx.font = '28px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#9CA3AF'; // muted
       ctx.fillText('1% better every day', canvas.width / 2, canvas.height - 140);
 
-      // User name (if available)
+      // User name or demo indicator
       const userName = user?.user_metadata?.full_name?.split(' ')[0];
-      if (userName) {
-        ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = '#718096';
-        ctx.fillText(`${userName}'s Progress`, canvas.width / 2, canvas.height - 100);
-      }
+      const footerText = currentDay > 0 && userName ? `${userName}'s Progress` : 'Try Looped Today';
+      ctx.font = '24px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = '#9CA3AF';
+      ctx.fillText(footerText, canvas.width / 2, canvas.height - 100);
 
       setIsGenerating(false);
     } catch (error) {
