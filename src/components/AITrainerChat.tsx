@@ -91,17 +91,20 @@ const AITrainerChat = () => {
     }
   };
 
-  // Remove auto-scroll to avoid annoying UX
+  // Only scroll when new trainer message arrives (not user messages)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Only scroll on first load, not on every message
   useEffect(() => {
-    if (messages.length === 1) {
-      scrollToBottom();
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      // Only scroll for trainer messages, not user messages
+      if (lastMessage.message_type === 'trainer') {
+        setTimeout(scrollToBottom, 100);
+      }
     }
-  }, [messages.length]);
+  }, [messages]);
 
   // Auto-greet new users
   useEffect(() => {
@@ -116,7 +119,7 @@ const AITrainerChat = () => {
   }, [user, messages.length]);
 
   return (
-    <Card className="card-soft flex flex-col h-96">
+    <Card className="card-soft flex flex-col h-80 shadow-lg">
       <div className="p-3 border-b border-border/30">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">

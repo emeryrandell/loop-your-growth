@@ -73,8 +73,9 @@ const CreateChallengeModal = ({ children }: CreateChallengeModalProps) => {
       });
       setIsOpen(false);
 
-      // Refresh today's challenge query
+      // Refresh challenge queries
       queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+      queryClient.invalidateQueries({ queryKey: ['in-progress-challenges'] });
     } catch (error) {
       console.error('Failed to create challenge:', error);
       toast({

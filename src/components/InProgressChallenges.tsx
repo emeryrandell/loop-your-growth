@@ -6,10 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const InProgressChallenges = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: inProgressChallenges = [], isLoading } = useQuery({
     queryKey: ['in-progress-challenges', user?.id],
@@ -42,6 +44,10 @@ const InProgressChallenges = () => {
         variant: "destructive"
       });
     } else {
+      // Invalidate queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['in-progress-challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+      
       toast({
         title: "Challenge started!",
         description: "Let's do this! 💪"
@@ -62,6 +68,9 @@ const InProgressChallenges = () => {
         variant: "destructive"
       });
     } else {
+      // Invalidate queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['in-progress-challenges'] });
+      
       toast({
         title: "Challenge removed",
         description: "Challenge deleted from your queue."

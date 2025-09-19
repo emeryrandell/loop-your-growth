@@ -118,8 +118,8 @@ export default {
 				'fade-in-up': 'fade-in-up 0.6s ease-out'
 			},
 			fontFamily: {
-				'display': ['Georgia', 'Times New Roman', 'serif'],
-				'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+				'display': ['Fraunces', 'Literata', 'Georgia', 'serif'],
+				'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
 			},
 			boxShadow: {
 				'soft': '0 2px 20px -5px hsl(var(--foreground) / 0.1)',

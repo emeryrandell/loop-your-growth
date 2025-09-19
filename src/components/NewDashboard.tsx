@@ -235,9 +235,9 @@ const NewDashboard = () => {
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* Calm Welcome Strip */}
             <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 text-center border border-primary/10">
               <h2 className="font-display text-2xl md:text-3xl font-medium mb-3 text-foreground">
@@ -436,163 +436,99 @@ const NewDashboard = () => {
                 </div>
                 
                 {/* Momentum Bar */}
-                <div className="w-full bg-secondary rounded-full h-3 mb-4">
+                <div className="w-full bg-muted/30 rounded-full h-3 mb-4">
                   <div 
-                    className="bg-gradient-to-r from-success to-success-glow h-3 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-success to-primary h-3 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${Math.min((streak.current_streak / 21) * 100, 100)}%` }}
-                  />
+                  ></div>
                 </div>
-                
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>0</span>
-                  <span>7 days</span>
-                  <span>21 days</span>
-                </div>
-                
-                <p className="text-sm text-center mt-3 text-muted-foreground">
-                  {streak.current_streak < 7 
-                    ? `${7 - streak.current_streak} days until your first milestone!`
-                    : streak.current_streak < 21 
-                    ? `${21 - streak.current_streak} days until your 21-day badge!`
-                    : "You're a habit champion! 🏆"
+                <div className="text-sm text-muted-foreground text-center">
+                  {streak.current_streak < 21 
+                    ? `${21 - streak.current_streak} days to your next milestone`
+                    : "Incredible consistency! 🎉"
                   }
-                </p>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <AITrainerChat />
+          {/* Sidebar */}  
+          <div className="lg:col-span-1 space-y-6">
+            {/* In Progress Challenges */}
             <InProgressChallenges />
-
+            
             {/* Quick Stats */}
-            <Card className="card-feature">
-              <CardHeader>
-                <CardTitle className="text-lg">Your Progress</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {streakData?.current_streak || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Current Streak</div>
-              </Card>
-              <Card className="p-4 text-center">
-                <div className="text-2xl font-bold">
-                  {streakData?.longest_streak || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Best Streak</div>
-              </Card>
-              <Card className="p-4 text-center">
-                <div className="text-2xl font-bold">
-                  {totalChallenges.data || 0}
-                </div>
-                <div className="text-sm text-muted-foreground">Total Days</div>
-              </Card>
-              <Card className="p-4 text-center">
-                <div className="text-2xl font-bold">
-                  {completionRate.data || 0}%
-                </div>
-                <div className="text-sm text-muted-foreground">Completion Rate</div>
-              </Card>
-            </div>
-
-              <Card className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium">Recent Challenges</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate('/history')}
-                  >
-                    View All
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {recentChallenges.length > 0 ? recentChallenges.map((challenge, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                      <span className="text-sm">
-                        {challenge.custom_title || challenge.challenges?.title || 'Challenge'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {challenge.custom_category || challenge.challenges?.category || 'General'}
-                        </Badge>
-                        <Badge variant="default" className="text-xs">
-                          ✅
-                        </Badge>
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="text-center py-4 text-muted-foreground">
-                      <p className="text-sm">No completed challenges yet</p>
-                      <p className="text-xs">Complete your first challenge to see it here!</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-
-              <Button
-                variant="outline"
-                onClick={() => navigate('/pricing')}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Upgrade Premium
-              </Button>
-
-              <CreateChallengeModal>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Your Own Challenge
-                </Button>
-              </CreateChallengeModal>
-              </CardContent>
-            </Card>
-
-            {/* Navigation */}
-            <Card className="card-feature">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Dashboard
+            <Card className="card-soft">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Quick Stats
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/history')}
-                >
-                  <History className="h-4 w-4 mr-2" />
-                  Challenge History
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/insights')}
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Weekly Insights
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/settings')}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Button>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Completed</span>
+                  <span className="font-medium">{totalChallenges.data || 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Success Rate</span>
+                  <span className="font-medium">{completionRate.data || 0}%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Best Streak</span>
+                  <span className="font-medium">{streak.longest_streak}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Create Challenge */}
+            <CreateChallengeModal>
+              <Card className="card-soft hover:shadow-soft transition-all duration-200 cursor-pointer">
+                <CardContent className="p-4 text-center">
+                  <Plus className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h3 className="font-semibold mb-1">Create Challenge</h3>
+                  <p className="text-xs text-muted-foreground">Add your own task</p>
+                </CardContent>
+              </Card>
+            </CreateChallengeModal>
+            
+            {/* Navigation */}
+            <Card className="card-soft">
+              <CardContent className="p-2">
+                <div className="space-y-1">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    onClick={() => navigate('/insights')}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Insights
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    onClick={() => navigate('/history')}
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    History
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    onClick={() => navigate('/settings')}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Your Coach - Fixed Position Bottom Right */}
+        <div className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-2rem)] z-50">
+          <AITrainerChat />
         </div>
       </div>
 
