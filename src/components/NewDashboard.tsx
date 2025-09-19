@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Flame, Calendar, Clock, Share2, StickyNote, TrendingUp, Zap, Award, Settings, Plus, Shuffle, Pause, User, Trophy, Target, Play, History, BarChart3 } from "lucide-react";
-import AITrainerChat from "./AITrainerChat";
+import CoachSidebar from "./CoachSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,7 @@ const NewDashboard = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [timeToggle, setTimeToggle] = useState(15);
+  const [isCoachOpen, setIsCoachOpen] = useState(false);
 
   // Fetch user streak data
   const { data: streakData } = useQuery({
@@ -211,7 +212,9 @@ const NewDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className={`max-w-7xl mx-auto px-4 py-8 transition-all duration-300 ${
+        isCoachOpen ? 'lg:mr-80' : ''
+      }`}>
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -525,12 +528,13 @@ const NewDashboard = () => {
             </Card>
           </div>
         </div>
-
-        {/* Your Coach - Fixed Position Bottom Right */}
-        <div className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-2rem)] z-50">
-          <AITrainerChat />
-        </div>
       </div>
+
+      {/* Coach Sidebar */}
+      <CoachSidebar 
+        isOpen={isCoachOpen}
+        onToggle={() => setIsCoachOpen(!isCoachOpen)}
+      />
 
       {/* Modals */}
       <DoItNowModal

@@ -119,20 +119,8 @@ const AITrainerChat = () => {
   }, [user, messages.length]);
 
   return (
-    <Card className="card-soft flex flex-col h-80 shadow-lg">
-      <div className="p-3 border-b border-border/30">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xs">🎯</span>
-          </div>
-          <h3 className="font-medium text-sm">Your Coach</h3>
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Small wins, zero shame
-        </p>
-      </div>
-
-      <ScrollArea className="flex-1 p-3">
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((msg) => (
             <div
@@ -143,8 +131,8 @@ const AITrainerChat = () => {
             >
               {msg.message_type === 'trainer' && (
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-primary" />
+                  <div className="w-8 h-8 rounded-full bg-sprout/20 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-sprout" />
                   </div>
                 </div>
               )}
@@ -152,8 +140,8 @@ const AITrainerChat = () => {
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   msg.message_type === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'bg-calm text-white'
+                    : 'bg-muted text-foreground'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -161,8 +149,8 @@ const AITrainerChat = () => {
 
               {msg.message_type === 'user' && (
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                    <User className="h-4 w-4" />
+                  <div className="w-8 h-8 rounded-full bg-calm/20 flex items-center justify-center">
+                    <User className="h-4 w-4 text-calm" />
                   </div>
                 </div>
               )}
@@ -172,15 +160,15 @@ const AITrainerChat = () => {
           {isLoading && (
             <div className="flex gap-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-primary animate-pulse" />
+                <div className="w-8 h-8 rounded-full bg-sprout/20 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-sprout animate-pulse" />
                 </div>
               </div>
               <div className="bg-muted p-3 rounded-lg">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -189,14 +177,14 @@ const AITrainerChat = () => {
         <div ref={messagesEndRef} />
       </ScrollArea>
 
-      <div className="p-4 border-t space-y-3">
+      <div className="p-4 border-t space-y-3 bg-muted/30">
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleSendMessage('create_challenge')}
             disabled={isLoading}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 flex-1"
           >
             <Plus className="h-3 w-3" />
             Create Challenge
@@ -206,7 +194,7 @@ const AITrainerChat = () => {
             size="sm"
             onClick={() => handleSendMessage('schedule_challenge')}
             disabled={isLoading}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 flex-1"
           >
             <Calendar className="h-3 w-3" />
             Plan Week
@@ -231,7 +219,7 @@ const AITrainerChat = () => {
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
