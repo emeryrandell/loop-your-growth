@@ -10,73 +10,73 @@ const FeaturesPage = () => {
   const navigate = useNavigate();
 
   const features = [
-    {
-      icon: <Brain className="h-8 w-8 text-primary" />,
-      title: "AI-Powered Trainer",
-      description: "Your personal coach that adapts to your progress and preferences.",
-      details: [
-        "Personalized daily challenges based on your goals",
-        "Difficulty adjustment based on your feedback",
-        "Motivational coaching tailored to your personality",
-        "Smart recommendations for optimal growth"
-      ]
-    },
-    {
-      icon: <Target className="h-8 w-8 text-success" />,
-      title: "Daily 1% Challenges",
-      description: "Small, achievable tasks that compound into massive results.",
-      details: [
-        "4 tracks: Study, Fitness, Mindset, Lifestyle",
-        "Scientifically-backed micro-habits",
-        "Time-efficient (5-30 minutes daily)",
-        "Progressive difficulty scaling"
-      ]
-    },
-    {
-      icon: <TrendingUp className="h-8 w-8 text-accent" />,
-      title: "Streak Tracking & Gamification",
-      description: "Stay motivated with streaks, badges, and visible progress.",
-      details: [
-        "Visual streak counters with milestone rewards",
-        "Bronze (7 days), Silver (21 days), Gold (41+ days) badges",
-        "Progress analytics and insights",
-        "Encouraging feedback for missed days"
-      ]
-    },
-    {
-      icon: <Users className="h-8 w-8 text-primary" />,
-      title: "Shareable Progress Cards",
-      description: "Create beautiful cards to share your wins and inspire others.",
-      details: [
-        "Aesthetic, minimalist design",
-        "One-click sharing to social media",
-        "Customizable themes and styles",
-        "Built-in virality for community growth"
-      ]
-    },
-    {
-      icon: <Calendar className="h-8 w-8 text-success" />,
-      title: "Challenge History & Journal",
-      description: "Track your journey with a complete log of your progress.",
-      details: [
-        "Complete history of all challenges",
-        "Personal notes and reflections",
-        "Success/failure tracking",
-        "Growth pattern analysis"
-      ]
-    },
-    {
-      icon: <Zap className="h-8 w-8 text-accent" />,
-      title: "Weekly Insights",
-      description: "Get detailed reports on your performance and areas for improvement.",
-      details: [
-        "Weekly completion rates",
-        "Focus area analysis",
-        "Habit strength metrics",
-        "Personalized recommendations"
-      ]
-    }
-  ];
+  {
+    icon: <Brain className="h-8 w-8 text-primary" />,
+    title: "Personal Trainer",
+    description: "A supportive coach that adapts to your progress and preferences.",
+    details: [
+      "Personalized daily challenges based on your goals",
+      "Difficulty adjusts with your feedback",
+      "Motivational coaching that fits your style",
+      "Smart recommendations for steady growth"
+    ]
+  },
+  {
+    icon: <Target className="h-8 w-8 text-success" />,
+    title: "Daily 1% Challenges",
+    description: "Small, achievable tasks that compound into real results.",
+    details: [
+      "4 tracks: Study, Fitness, Mindset, Lifestyle",
+      "Scientifically-backed micro-habits",
+      "Time-efficient (5–30 minutes daily)",
+      "Progressive difficulty scaling"
+    ]
+  },
+  {
+    icon: <TrendingUp className="h-8 w-8 text-accent" />,
+    title: "Streak Tracking & Gamification",
+    description: "Stay motivated with streaks, badges, and visible progress.",
+    details: [
+      "Visual streak counters with milestone rewards",
+      "Bronze (7), Silver (21), Gold (41+) badges",
+      "Progress analytics and insights",
+      "Encouraging feedback for missed days"
+    ]
+  },
+  {
+    icon: <Users className="h-8 w-8 text-primary" />,
+    title: "Shareable Progress Cards",
+    description: "Create beautiful cards to share your wins and inspire others.",
+    details: [
+      "Aesthetic, minimalist design",
+      "One-click sharing to social",
+      "Customizable themes and styles",
+      "Built-in virality for community growth"
+    ]
+  },
+  {
+    icon: <Calendar className="h-8 w-8 text-success" />,
+    title: "Challenge History & Journal",
+    description: "Track your journey with a complete log of your progress.",
+    details: [
+      "Complete history of all challenges",
+      "Personal notes and reflections",
+      "Success/failure tracking",
+      "Growth pattern analysis"
+    ]
+  },
+  {
+    icon: <Zap className="h-8 w-8 text-accent" />,
+    title: "Weekly Insights",
+    description: "See patterns and areas to nudge next week.",
+    details: [
+      "Weekly completion rates",
+      "Focus area breakdown",
+      "Habit strength metrics",
+      "Personalized recommendations"
+    ]
+  }
+];
 
   return (
     <div className="min-h-screen bg-background">
