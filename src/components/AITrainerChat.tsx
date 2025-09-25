@@ -140,8 +140,8 @@ const AITrainerChat = () => {
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   msg.message_type === 'user'
-                    ? 'bg-calm text-white'
-                    : 'bg-muted text-foreground'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -149,8 +149,8 @@ const AITrainerChat = () => {
 
               {msg.message_type === 'user' && (
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-calm/20 flex items-center justify-center">
-                    <User className="h-4 w-4 text-calm" />
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
                   </div>
                 </div>
               )}
