@@ -15,7 +15,7 @@ const CoachSidebar = ({ isOpen, onToggle }: CoachSidebarProps) => {
       {/* Floating Toggle Button - Always Visible */}
       <Button
         onClick={onToggle}
-        className={`fixed bottom-8 z-50 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-white shadow-elegant transition-all duration-300 animate-pulse ${
+        className={`fixed bottom-8 z-50 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-white shadow-elegant transition-all duration-300 ${
           isOpen ? 'right-[22rem]' : 'right-6'
         }`}
         size="icon"
