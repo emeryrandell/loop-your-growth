@@ -64,7 +64,7 @@ const AITrainerChat = () => {
       setIsLoading(false);
     },
     onError: (error: any) => {
-      console.error('AI Trainer error:', error);
+      console.error('Personal Coach error:', error);
       
       // Show helpful error message based on the error type
       let errorMessage = "Couldn't send message. Please try again.";
@@ -131,8 +131,8 @@ const AITrainerChat = () => {
             >
               {msg.message_type === 'trainer' && (
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-sprout/20 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-sprout" />
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-primary" />
                   </div>
                 </div>
               )}
@@ -160,15 +160,15 @@ const AITrainerChat = () => {
           {isLoading && (
             <div className="flex gap-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-sprout/20 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-sprout animate-pulse" />
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-primary animate-pulse" />
                 </div>
               </div>
               <div className="bg-muted p-3 rounded-lg">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-sprout rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>

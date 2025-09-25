@@ -47,11 +47,11 @@ const FAQPage = () => {
         },
         {
           question: "What if I miss a day?",
-          answer: "No guilt! Looped is designed with a supportive approach. Missing a day resets your streak, but the AI trainer provides encouraging feedback and helps you get back on track. Consistency beats perfection."
+          answer: "No guilt! Looped is designed with a supportive approach. Missing a day resets your streak, but your personal coach provides encouraging feedback and helps you get back on track. Consistency beats perfection."
         },
         {
           question: "Can I switch between tracks?",
-          answer: "Absolutely! Premium users can change their primary track anytime in settings. The AI trainer will adapt to provide challenges for your new focus area while maintaining your overall progress history."
+          answer: "Absolutely! Premium users can change their primary track anytime in settings. Your personal coach will adapt to provide challenges for your new focus area while maintaining your overall progress history."
         }
       ]
     },
@@ -60,11 +60,11 @@ const FAQPage = () => {
       faqs: [
         {
           question: "What's included in the free demo?",
-          answer: "The free demo includes one day of challenges, basic progress tracking, limited AI trainer interaction, and community access. It's designed to give you a real taste of the Looped experience."
+          answer: "The free demo includes one day of challenges, basic progress tracking, limited coaching interaction, and community access. It's designed to give you a real taste of the Looped experience."
         },
         {
           question: "What additional features do I get with Premium?",
-          answer: "Premium includes unlimited daily challenges, full AI trainer, streak tracking with badges, shareable progress cards, complete challenge history, weekly insights, priority support, and early access to new features."
+          answer: "Premium includes unlimited daily challenges, full personal coaching, streak tracking with badges, shareable progress cards, complete challenge history, weekly insights, priority support, and early access to new features."
         },
         {
           question: "How do progress cards work?",

@@ -15,10 +15,11 @@ const CoachSidebar = ({ isOpen, onToggle }: CoachSidebarProps) => {
       {/* Floating Toggle Button - Always Visible */}
       <Button
         onClick={onToggle}
-        className={`fixed bottom-6 z-50 h-14 w-14 rounded-full bg-sprout hover:bg-sprout/90 text-white shadow-lg transition-all duration-300 ${
+        className={`fixed bottom-8 z-50 h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-white shadow-elegant transition-all duration-300 animate-pulse ${
           isOpen ? 'right-[22rem]' : 'right-6'
         }`}
         size="icon"
+        title="Personal Coach"
       >
         {isOpen ? (
           <ChevronRight className="h-6 w-6" />
@@ -37,8 +38,8 @@ const CoachSidebar = ({ isOpen, onToggle }: CoachSidebarProps) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-border">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-sprout" />
-              <h3 className="font-serif text-lg font-medium">Your AI Coach</h3>
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <h3 className="font-serif text-lg font-medium">Your Personal Coach</h3>
             </div>
             <Button
               variant="ghost"

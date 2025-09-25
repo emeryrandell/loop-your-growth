@@ -91,7 +91,7 @@ const FeaturesPage = () => {
               <span className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent"> Build Better Habits</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Looped combines AI coaching, behavioral science, and social motivation 
+              Looped combines personalized coaching, behavioral science, and social motivation 
               to make self-improvement effortless and sustainable.
             </p>
             <Button 
@@ -151,7 +151,7 @@ const FeaturesPage = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Choose Your Track</h3>
                 <p className="text-muted-foreground">
-                  Select from Study, Fitness, Mindset, or Lifestyle. Your AI trainer personalizes challenges to your goals.
+                  Select from Study, Fitness, Mindset, or Lifestyle. Your personal coach personalizes challenges to your goals.
                 </p>
               </div>
               <div className="text-center">
