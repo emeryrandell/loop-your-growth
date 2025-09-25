@@ -365,6 +365,6 @@ export function useTrainer() {
     completeOnboarding,
     completeChallenge,
     isOnboardingComplete: trainerSettings?.onboarding_completed || false,
-    canAccessPaidFeatures: true, // All features available without payment
+    canAccessPaidFeatures: subscription?.status === 'active' || subscription?.plan_type !== 'free'
   };
 }

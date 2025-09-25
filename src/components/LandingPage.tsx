@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle, Users, Target, Brain } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Target, Brain, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ const LandingPage = () => {
   const faqs = [
     {
       question: "Is this an app?",
-      answer: "No, it's a clean web app you can add to your homescreen. Works perfectly on all devices."
+      answer: "It's a clean web app you can add to your homescreen. We're also building a mobile app with free features coming soon!"
     },
     {
       question: "How personalized is it?",
@@ -40,6 +40,18 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Mobile App Coming Soon Banner */}
+      <section className="py-3 px-4 bg-gradient-to-r from-primary/10 to-primary-glow/10 border-b border-primary/20">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-2 text-primary text-sm">
+            <Smartphone className="h-4 w-4" />
+            <p className="font-medium">
+              📱 Coming Soon: Mobile App with Free Features
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/20 to-background" />
@@ -57,9 +69,9 @@ const LandingPage = () => {
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up [animation-delay:0.2s]">
             Your personalized trainer learns from you and gives you one challenge each day to build momentum.
           </p>
-          <Link to="/demo">
+          <Link to="/auth">
             <Button size="lg" className="btn-hero text-lg px-8 py-6 animate-fade-in-up [animation-delay:0.4s]">
-              Try Free for 1 Day
+              Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
@@ -108,7 +120,7 @@ const LandingPage = () => {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold mb-2">Monthly</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">$9.99</span>
+                  <span className="text-4xl font-bold">$7.99</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <Button className="w-full btn-ghost-warm" onClick={() => window.location.href = "/pricing"}>
@@ -125,10 +137,10 @@ const LandingPage = () => {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold mb-2">Yearly</h3>
                 <div className="mb-2">
-                  <span className="text-4xl font-bold">$99.99</span>
+                  <span className="text-4xl font-bold">$59.99</span>
                   <span className="text-muted-foreground">/year</span>
                 </div>
-                <p className="text-sm text-success font-medium mb-6">Save $20 annually</p>
+                <p className="text-sm text-success font-medium mb-6">Save $35.89 annually</p>
                 <Button className="w-full btn-hero" onClick={() => window.location.href = "/pricing"}>
                   Get Started
                 </Button>

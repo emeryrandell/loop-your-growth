@@ -380,10 +380,10 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in ai-trainer function:", error);
     const friendly =
-      error?.message === "OpenAI API key not configured"
+      (error as any)?.message === "OpenAI API key not configured"
         ? "I need an OpenAI API key to work properly. Please add one in your project settings under Secrets."
         : "I'm having trouble connecting right now. Please try again in a moment!";
-    return new Response(JSON.stringify({ error: error.message, response: friendly }), {
+    return new Response(JSON.stringify({ error: (error as any)?.message || 'Unknown error', response: friendly }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

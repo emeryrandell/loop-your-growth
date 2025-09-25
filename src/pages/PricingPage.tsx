@@ -1,4 +1,4 @@
-import { Check, Zap, Star, Crown } from "lucide-react";
+import { Check, Star, Crown, Smartphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,28 +16,7 @@ const PricingPage = () => {
   const plans = {
     monthly: [
       {
-        name: "Free Demo",
-        price: "$0",
-        period: "forever",
-        description: "Try Looped with limited features",
-        icon: <Zap className="h-6 w-6" />,
-        features: [
-          "1-day challenge preview",
-          "Basic progress tracking",
-          "Limited AI trainer interaction",
-          "Community access"
-        ],
-        limitations: [
-          "No streak tracking",
-          "No progress cards",
-          "No challenge history"
-        ],
-        buttonText: "Try Free Demo",
-        buttonVariant: "outline" as const,
-        popular: false
-      },
-      {
-        name: "Premium",
+        name: "Monthly Premium",
         price: "$7.99",
         period: "month",
         description: "Full access to transform your life",
@@ -58,7 +37,7 @@ const PricingPage = () => {
         popular: true
       },
       {
-        name: "Yearly",
+        name: "Yearly Premium",
         price: "$59.99",
         period: "year",
         originalPrice: "$95.88",
@@ -66,7 +45,7 @@ const PricingPage = () => {
         description: "Best value for serious self-improvement",
         icon: <Crown className="h-6 w-6" />,
         features: [
-          "Everything in Premium",
+          "Everything in Monthly Premium",
           "37% discount (2 months free!)",
           "Exclusive yearly challenges",
           "Advanced analytics dashboard",
@@ -76,34 +55,13 @@ const PricingPage = () => {
           "Custom habit creation tools"
         ],
         limitations: [],
-        buttonText: "Get Yearly",
+        buttonText: "Get Yearly Premium",
         buttonVariant: "default" as const,
         popular: false,
         bestValue: true
       }
     ],
     yearly: [
-      {
-        name: "Free Demo",
-        price: "$0",
-        period: "forever",
-        description: "Try Looped with limited features",
-        icon: <Zap className="h-6 w-6" />,
-        features: [
-          "1-day challenge preview",
-          "Basic progress tracking",
-          "Limited AI trainer interaction",
-          "Community access"
-        ],
-        limitations: [
-          "No streak tracking",
-          "No progress cards",
-          "No challenge history"
-        ],
-        buttonText: "Try Free Demo",
-        buttonVariant: "outline" as const,
-        popular: false
-      },
       {
         name: "Yearly Premium",
         price: "$59.99",
@@ -115,7 +73,7 @@ const PricingPage = () => {
         features: [
           "Everything in monthly Premium",
           "37% discount (2 months free!)",
-          "Exclusive yearly challenges", 
+          "Exclusive yearly challenges",
           "Advanced analytics dashboard",
           "Goal-setting workshops",
           "1-on-1 coaching session (quarterly)",
@@ -129,7 +87,7 @@ const PricingPage = () => {
         bestValue: true
       },
       {
-        name: "Monthly",
+        name: "Monthly Premium",
         price: "$7.99",
         period: "month", 
         description: "Full access, billed monthly",
@@ -155,9 +113,7 @@ const PricingPage = () => {
   const currentPlans = plans[billingCycle];
 
   const handlePlanSelect = (planName: string) => {
-    if (planName === "Free Demo") {
-      navigate("/demo");
-    } else if (user) {
+    if (user) {
       navigate("/dashboard");
     } else {
       navigate("/auth");
@@ -169,6 +125,18 @@ const PricingPage = () => {
       <Navigation isAuthenticated={!!user} userName={user?.user_metadata?.full_name} />
       
       <div className="pt-16">
+        {/* Mobile App Coming Soon Banner */}
+        <section className="py-4 px-4 bg-gradient-to-r from-primary/10 to-primary-glow/10 border-b border-primary/20">
+          <div className="container mx-auto max-w-4xl text-center">
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <Smartphone className="h-5 w-5" />
+              <p className="text-sm font-medium">
+                🚀 Coming Soon: Free Mobile App with basic features - full web experience requires subscription
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section */}
         <section className="py-20 px-4 text-center">
           <div className="container mx-auto max-w-4xl">
@@ -177,7 +145,7 @@ const PricingPage = () => {
               <span className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent"> Pricing</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Start your self-improvement journey with our free demo, then upgrade when you're ready to unlock your full potential.
+              Choose your plan and unlock your full potential with personalized daily challenges and AI coaching.
             </p>
             
             {/* Billing Toggle */}
@@ -192,8 +160,8 @@ const PricingPage = () => {
 
         {/* Pricing Cards */}
         <section className="py-12 px-4">
-          <div className="container mx-auto max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="container mx-auto max-w-4xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {currentPlans.map((plan, index) => (
                 <Card 
                   key={plan.name} 
@@ -252,20 +220,6 @@ const PricingPage = () => {
                         </li>
                       ))}
                     </ul>
-                    
-                    {plan.limitations.length > 0 && (
-                      <div className="border-t pt-4">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Not included:</p>
-                        <ul className="space-y-2">
-                          {plan.limitations.map((limitation, idx) => (
-                            <li key={idx} className="flex items-start text-sm text-muted-foreground">
-                              <span className="text-muted-foreground mr-2">•</span>
-                              <span>{limitation}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </CardContent>
                   
                   <CardFooter>
@@ -295,11 +249,11 @@ const PricingPage = () => {
             <div className="space-y-6">
               <Card className="card-feature">
                 <CardHeader>
-                  <CardTitle className="text-lg">What happens after the free demo?</CardTitle>
+                  <CardTitle className="text-lg">What about the mobile app?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    The free demo gives you access to one day of challenges. After that, you can choose to upgrade to Premium to continue your journey with unlimited access to all features.
+                    We're working on a mobile app with basic free features! The full experience with AI coaching and unlimited challenges will remain on the web platform with your subscription.
                   </p>
                 </CardContent>
               </Card>
@@ -352,9 +306,9 @@ const PricingPage = () => {
             <Button 
               size="lg" 
               className="btn-hero text-lg px-8 py-6"
-              onClick={() => navigate("/demo")}
+              onClick={() => navigate("/auth")}
             >
-              Try Free Demo
+              Get Started Now
             </Button>
           </div>
         </section>

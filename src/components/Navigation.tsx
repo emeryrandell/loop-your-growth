@@ -39,7 +39,7 @@ const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
                 <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">Pricing</Link>
                 <Link to="/faq" className="text-foreground hover:text-primary transition-colors">FAQ</Link>
                 <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
-                <Button className="btn-hero" onClick={() => navigate("/auth")}>Start Free</Button>
+                <Button className="btn-hero" onClick={() => navigate("/auth")}>Get Started</Button>
               </>
             ) : (
               <>
@@ -84,7 +84,7 @@ const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
                   </Link>
                   <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                     <Button variant="outline" className="w-full" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>Sign In</Button>
-                    <Button className="btn-hero w-full" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>Start Free</Button>
+                    <Button className="btn-hero w-full" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>Get Started</Button>
                   </div>
                 </>
               ) : (

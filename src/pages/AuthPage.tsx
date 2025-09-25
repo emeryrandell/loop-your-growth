@@ -83,6 +83,9 @@ const AuthPage = () => {
           <p className="text-muted-foreground text-lg">
             Your journey to daily 1% improvements starts here
           </p>
+          <p className="text-sm text-primary mt-2">
+            📱 Mobile app with free features coming soon!
+          </p>
         </div>
 
         <Card className="card-gradient">
