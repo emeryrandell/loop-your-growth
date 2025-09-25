@@ -12,12 +12,12 @@ const DashboardPage = () => {
     return null;
   }
 
-  if (!canAccessPaidFeatures) {
-    // Redirect to upgrade page or demo
-    window.location.href = '/demo';
-    return null;
-  }
-
+ if (!canAccessPaidFeatures) {
+   // Redirect to pricing/upgrade
+   window.location.href = '/pricing';
+   return null;
+ }
+  
   return <NewDashboard />;
 };
 

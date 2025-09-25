@@ -9,7 +9,6 @@ import AuthPage from "./pages/AuthPage";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
 import FAQPage from "./pages/FAQPage";
-import DemoPage from "./pages/DemoPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProgressPage from "./pages/ProgressPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -32,7 +31,6 @@ const App = () => (
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/faq" element={<FAQPage />} />
-            <Route path="/demo" element={<DemoPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/history" element={<HistoryPage />} />
