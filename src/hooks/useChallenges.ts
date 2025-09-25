@@ -263,7 +263,7 @@ export function useChallenges() {
     },
     onSuccess: () => {
       toast({
-        title: "Challenge Completed! 🎉",
+        title: "Challenge Completed!",
         description: "Great job! Your streak has been updated.",
       });
       queryClient.invalidateQueries({ queryKey: ['today-challenge'] });

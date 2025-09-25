@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, Calendar, Target, Award, Clock } from "lucide-react";
+import { BarChart3, TrendingUp, Calendar, Target, Award, Clock, Flame, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
@@ -173,12 +173,12 @@ const InsightsPage = () => {
                     </p>
                     <p className="text-sm">
                       {weekCompletionRate >= 80 ? 
-                        "🔥 Outstanding week! You're building incredible momentum and consistency." :
+                        "Outstanding week! You're building incredible momentum and consistency." :
                         weekCompletionRate >= 60 ?
-                        "🌟 Solid week! You're making great progress on your growth journey." :
+                        "Solid week! You're making great progress on your growth journey." :
                         weekCompletionRate >= 40 ?
-                        "💪 Good effort! Remember, progress isn't always linear - keep going!" :
-                        "🌱 Every step counts! Focus on small wins and building consistency."
+                        "Good effort! Remember, progress isn't always linear - keep going!" :
+                        "Every step counts! Focus on small wins and building consistency."
                       }
                     </p>
                   </div>
@@ -318,8 +318,9 @@ const InsightsPage = () => {
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Badge variant={streak.current_streak >= 7 ? "default" : "secondary"}>
-                        🔥 Week Warrior
+                      <Badge variant={streak.current_streak >= 7 ? "default" : "secondary"} className="flex items-center gap-1">
+                        <Flame className="h-3 w-3" />
+                        Week Warrior
                       </Badge>
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -329,8 +330,9 @@ const InsightsPage = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Badge variant={streak.longest_streak >= 21 ? "default" : "secondary"}>
-                        🏆 Habit Master
+                      <Badge variant={streak.longest_streak >= 21 ? "default" : "secondary"} className="flex items-center gap-1">
+                        <Trophy className="h-3 w-3" />
+                        Habit Master
                       </Badge>
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -340,8 +342,9 @@ const InsightsPage = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Badge variant={totalCompleted >= 100 ? "default" : "secondary"}>
-                        💯 Century Club
+                      <Badge variant={totalCompleted >= 100 ? "default" : "secondary"} className="flex items-center gap-1">
+                        <Target className="h-3 w-3" />
+                        Century Club
                       </Badge>
                     </div>
                     <span className="text-xs text-muted-foreground">

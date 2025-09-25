@@ -46,7 +46,7 @@ const LandingPage = () => {
           <div className="flex items-center justify-center gap-2 text-primary text-sm">
             <Smartphone className="h-4 w-4" />
             <p className="font-medium">
-              📱 Coming Soon: Mobile App with Free Features
+              Coming Soon: Mobile App with Free Features
             </p>
           </div>
         </div>

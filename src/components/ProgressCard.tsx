@@ -1,4 +1,4 @@
-import { Download, Copy, Share2 } from "lucide-react";
+import { Download, Copy, Share2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -40,7 +40,7 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
       ctx.fillText('1% Better, Every Day', canvas.width / 2, 85);
 
       ctx.font = 'bold 32px Arial';
-      ctx.fillText(`Day ${day} ✅`, canvas.width / 2, 160);
+      ctx.fillText(`Day ${day}`, canvas.width / 2, 160);
 
       ctx.font = '20px Arial';
       ctx.fillText(`Streak: ${streak} Days`, canvas.width / 2, 200);
@@ -97,7 +97,7 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
       ctx.fillText('1% Better, Every Day', canvas.width / 2, 85);
 
       ctx.font = 'bold 32px Arial';
-      ctx.fillText(`Day ${day} ✅`, canvas.width / 2, 160);
+      ctx.fillText(`Day ${day}`, canvas.width / 2, 160);
 
       ctx.font = '20px Arial';
       ctx.fillText(`Streak: ${streak} Days`, canvas.width / 2, 200);
@@ -125,13 +125,13 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `Day ${day} Complete! 🎉`,
-          text: `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum! 💪`,
+          title: `Day ${day} Complete!`,
+          text: `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum!`,
           url: 'https://looped.app'
         });
       } else {
         // Fallback: copy text to clipboard
-        const shareText = `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum! 💪 Join me at https://looped.app`;
+        const shareText = `Just completed day ${day} of my 1% journey! Current streak: ${streak} days. ${userName} is building momentum! Join me at https://looped.app`;
         await navigator.clipboard.writeText(shareText);
         alert('Share text copied to clipboard!');
       }
@@ -158,7 +158,9 @@ const ProgressCard = ({ day, streak, userName = "Looper" }: ProgressCardProps) =
             </div>
             
             <div className="mb-6">
-              <div className="text-4xl font-bold mb-2">Day {day} ✅</div>
+              <div className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+                Day {day} <Trophy className="h-8 w-8 text-accent" />
+              </div>
               <div className="text-xl">Streak: {streak} Days</div>
             </div>
             

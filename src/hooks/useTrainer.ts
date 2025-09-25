@@ -264,7 +264,7 @@ export function useTrainer() {
     },
     onSuccess: () => {
       toast({
-        title: "Welcome to Looped! 🎉",
+        title: "Welcome to Looped!",
         description: "Your Trainer is now ready to create personalized challenges for you.",
       });
       queryClient.invalidateQueries({ queryKey: ['trainer-settings'] });
@@ -347,7 +347,7 @@ export function useTrainer() {
     },
     onSuccess: () => {
       toast({
-        title: "Challenge Complete! 🎉",
+        title: "Challenge Complete!",
         description: "Great job! Your Trainer is preparing tomorrow's challenge.",
       });
       queryClient.invalidateQueries({ queryKey: ['today-challenge'] });

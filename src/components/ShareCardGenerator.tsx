@@ -136,7 +136,7 @@ const ShareCardGenerator = ({ type = 'daily', challengeTitle, category, onClose 
     link.href = canvasRef.current.toDataURL();
     link.click();
     
-    toast.success('Share card downloaded! 📱');
+    toast.success('Share card downloaded!');
   };
 
   const shareCard = async () => {
@@ -151,14 +151,14 @@ const ShareCardGenerator = ({ type = 'daily', challengeTitle, category, onClose 
             await navigator.share({
               files: [file],
               title: 'My Looped Progress',
-              text: '1% better every day! 🎯'
+              text: '1% better every day!'
             });
           } else {
             // Fallback to copying image data
             await navigator.clipboard.write([
               new ClipboardItem({ 'image/png': blob })
             ]);
-            toast.success('Share card copied to clipboard! 📋');
+            toast.success('Share card copied to clipboard!');
           }
         }
       });
@@ -169,9 +169,9 @@ const ShareCardGenerator = ({ type = 'daily', challengeTitle, category, onClose 
   };
 
   const copyLink = () => {
-    const text = `Just completed day ${currentDay} of my 1% improvement journey! 🎯 Current streak: ${streak?.current_streak} days. #LoopedLife`;
+    const text = `Just completed day ${currentDay} of my 1% improvement journey! Current streak: ${streak?.current_streak} days. #LoopedLife`;
     navigator.clipboard.writeText(text);
-    toast.success('Caption copied! 📝');
+    toast.success('Caption copied!');
   };
 
   useEffect(() => {

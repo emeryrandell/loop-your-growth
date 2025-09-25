@@ -55,7 +55,7 @@ const InProgressChallenges = () => {
         
         toast({
           title: "Challenge started!",
-          description: "Let's do this! 💪"
+          description: "Let's do this!"
         });
       }
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Calendar, TrendingUp, Award, Share2 } from "lucide-react";
+import { Calendar, TrendingUp, Award, Share2, Trophy, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
@@ -145,7 +145,7 @@ const ProgressPage = () => {
                     {streak.current_streak} days
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Keep it going! You're on fire 🔥
+                    Keep it going! You're building great momentum
                   </p>
                 </CardContent>
               </Card>
@@ -229,8 +229,14 @@ const ProgressPage = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="text-xl">
-                        {challenge.status === 'completed' ? "✅" : challenge.status === 'snoozed' ? "⏸️" : "❌"}
+                      <div className="text-xl flex items-center gap-2">
+                        {challenge.status === 'completed' ? (
+                          <Trophy className="h-5 w-5 text-success" />
+                        ) : challenge.status === 'snoozed' ? (
+                          <Clock className="h-5 w-5 text-accent" />
+                        ) : (
+                          <span className="w-5 h-5 rounded-full bg-destructive/20"></span>
+                        )}
                       </div>
                     </div>
                   ))}

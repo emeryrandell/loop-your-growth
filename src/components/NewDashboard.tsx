@@ -163,7 +163,7 @@ const NewDashboard = () => {
       }, {
         onSuccess: () => {
           toast({
-            title: "Challenge Complete! 🎉",
+            title: "Challenge Complete!",
             description: "Great work! Your streak continues to grow.",
           });
         }
@@ -205,9 +205,9 @@ const NewDashboard = () => {
     const hour = new Date().getHours();
     const name = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
     
-    if (hour < 12) return `Morning, ${name} 👋`;
-    if (hour < 17) return `Afternoon, ${name} 👋`;
-    return `Evening, ${name} 👋`;
+    if (hour < 12) return `Morning, ${name}`;
+    if (hour < 17) return `Afternoon, ${name}`;
+    return `Evening, ${name}`;
   };
 
   return (
@@ -306,9 +306,11 @@ const NewDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   {todayChallenge.benefit && (
-                    <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
-                      <div className="flex items-start space-x-2">
-                        <span className="text-success text-sm">💡</span>
+                      <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="w-2 h-2 bg-success rounded-full"></span>
+                        </div>
                         <p className="text-sm font-medium">
                           <span className="text-success">Why this works:</span> {todayChallenge.benefit}
                         </p>
@@ -319,7 +321,7 @@ const NewDashboard = () => {
                   {todayChallenge.status === 'completed' ? (
                     <div className="text-center py-8 space-y-4">
                       <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto">
-                        <span className="text-3xl">✅</span>
+                        <Trophy className="h-8 w-8 text-success" />
                       </div>
                       <h4 className="text-xl font-semibold text-success">Challenge Complete!</h4>
                       <p className="text-muted-foreground">
@@ -448,7 +450,7 @@ const NewDashboard = () => {
                 <div className="text-sm text-muted-foreground text-center">
                   {streak.current_streak < 21 
                     ? `${21 - streak.current_streak} days to your next milestone`
-                    : "Incredible consistency! 🎉"
+                    : "Incredible consistency!"
                   }
                 </div>
               </CardContent>

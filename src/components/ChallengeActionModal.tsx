@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Pause, RotateCcw, Timer, Clock, Shuffle, Moon } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer, Clock, Shuffle, Moon, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChallengeActionModalProps {
@@ -258,9 +258,10 @@ const ChallengeActionModal = ({
             <div className="space-y-2">
               <Button
                 onClick={handleComplete}
-                className="btn-hero w-full"
+                className="btn-hero w-full flex items-center gap-2"
               >
-                ✅ Complete
+                <Trophy className="h-4 w-4" />
+                Complete
               </Button>
               <div className="flex space-x-1">
                 <Button

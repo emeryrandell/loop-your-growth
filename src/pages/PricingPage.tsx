@@ -131,7 +131,7 @@ const PricingPage = () => {
             <div className="flex items-center justify-center gap-2 text-primary">
               <Smartphone className="h-5 w-5" />
               <p className="text-sm font-medium">
-                🚀 Coming Soon: Free Mobile App with basic features - full web experience requires subscription
+                Coming Soon: Free Mobile App with basic features - full web experience requires subscription
               </p>
             </div>
           </div>

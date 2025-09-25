@@ -97,7 +97,9 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <div className="text-success text-2xl mb-2">✅</div>
+                    <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Trophy className="h-5 w-5 text-success" />
+                    </div>
                     <p className="text-success font-medium">Challenge Complete!</p>
                     <p className="text-sm text-muted-foreground mt-1">
                       Tomorrow's challenge will be ready at midnight
