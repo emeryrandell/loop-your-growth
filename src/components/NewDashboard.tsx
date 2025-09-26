@@ -20,8 +20,6 @@ import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import InProgressChallenges from "./InProgressChallenges";
 
-const [doItNowOpen, setDoItNowOpen] = useState(false);
-
 const NewDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -37,6 +35,7 @@ const NewDashboard = () => {
   } = useTrainer();
   
   const showOnboarding = false;
+  const [doItNowOpen, setDoItNowOpen] = useState(false);
   const [feedback, setFeedback] = useState<'too_easy' | 'just_right' | 'too_hard' | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
