@@ -1,75 +1,27 @@
-// supabase/functions/ai-trainer/index.ts
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Challenge = {
-  title: string;
-  description: string;
-  category?: string;
-  estimated_minutes?: number;
-  difficulty?: number;
-  benefit?: string;
-};
-
-const CATEGORIES = [
-  "energy",
-  "mindset",
-  "focus",
-  "relationships",
-  "home",
-  "finance",
-  "creativity",
-  "recovery",
-] as const;
-
-function extractJson(text: string): any | null {
-  try {
-    // if it's already pure json
-    return JSON.parse(text);
-  } catch {
-    // try to pull the first {...} block
-    const match = text.match(/\{[\s\S]*\}$/m) || text.match(/\{[\s\S]*?\}/m);
-    if (!match) return null;
-    try {
-      return JSON.parse(match[0]);
-    } catch {
-      return null;
-    }
+function tryParseJSONBlock(text: string) {
+  // 1) direct parse
+  try { return JSON.parse(text); } catch (_) {}
+  // 2) extract first {...} block and parse
+  const m = text.match(/\{[\s\S]*\}/);
+  if (m) {
+    try { return JSON.parse(m[0]); } catch (_) {}
   }
+  return null;
 }
 
-function normalizeChallenge(raw: any): Challenge {
-  const title = String(raw?.title || "").trim();
-  const description = String(raw?.description || "").trim();
-
-  // category
-  const cat = String(raw?.category || "").toLowerCase().trim();
-  const category = (CATEGORIES as readonly string[]).includes(cat) ? cat : "mindset";
-
-  // estimated_minutes: allow 1–1440 (customizable to the minute)
-  let estimated_minutes = Number(raw?.estimated_minutes ?? raw?.time_minutes ?? 15);
-  if (!Number.isFinite(estimated_minutes)) estimated_minutes = 15;
-  estimated_minutes = Math.max(1, Math.min(1440, Math.round(estimated_minutes)));
-
-  // difficulty 1–5
-  let difficulty = Number(raw?.difficulty ?? 2);
-  if (!Number.isFinite(difficulty)) difficulty = 2;
-  difficulty = Math.max(1, Math.min(5, Math.round(difficulty)));
-
-  const benefit = raw?.benefit ? String(raw.benefit).trim() : undefined;
-
-  if (!title || !description) {
-    throw new Error("Invalid challenge JSON (missing title/description).");
-  }
-
-  return { title, description, category, estimated_minutes, difficulty, benefit };
+function sanitizeMinutes(v: unknown, fallback = 15) {
+  const n = Number(v);
+  if (Number.isFinite(n) && n > 0 && n < 24 * 60) return Math.round(n);
+  return fallback;
 }
 
 serve(async (req) => {
@@ -78,19 +30,18 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const { message = "", action = "greeting" } = body;
+    const { message, action } = await req.json();
 
-    const supabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // auth
-    const authHeader = req.headers.get("Authorization") ?? "";
+    // --- Auth
+    const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer ", "");
-    const { data: authData } = await supabaseClient.auth.getUser(token);
-    const user = authData?.user;
+    const { data: userRes } = await supabase.auth.getUser(token);
+    const user = userRes?.user;
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -98,11 +49,11 @@ serve(async (req) => {
       });
     }
 
-    // settings/memory/recent (optional context; no catalog reads)
+    // --- Pull context (optional; safe if missing)
     const [settingsResult, memoryResult, messagesResult] = await Promise.all([
-      supabaseClient.from("trainer_settings").select("*").eq("user_id", user.id).maybeSingle(),
-      supabaseClient.from("trainer_memory").select("*").eq("user_id", user.id),
-      supabaseClient
+      supabase.from("trainer_settings").select("*").eq("user_id", user.id).single(),
+      supabase.from("trainer_memory").select("*").eq("user_id", user.id),
+      supabase
         .from("trainer_messages")
         .select("*")
         .eq("user_id", user.id)
@@ -110,160 +61,177 @@ serve(async (req) => {
         .limit(10),
     ]);
 
-    const context = {
-      settings: settingsResult?.data ?? null,
-      memory: Object.fromEntries(
-        (memoryResult.data ?? []).map((m: any) => [m.key, m.value]),
-      ),
-      recentMessages: (messagesResult.data ?? []).reverse(),
-    };
+    const settings = settingsResult.data ?? null;
+    const memoryRows = memoryResult.data ?? [];
+    const recentMessages = (messagesResult.data ?? []).reverse();
 
-    const systemPrompt = `
-You are a warm, brief, human-sounding personal coach focused on tiny daily improvements.
-Never reference being an AI. Keep messages short and actionable.
+    const memory: Record<string, string> = {};
+    for (const it of memoryRows) memory[it.key] = it.value;
 
-User Context:
-${JSON.stringify(context, null, 2)}
+    // --- SYSTEM PROMPT
+    let systemPrompt = `
+You are their personal 1% coach—warm, encouraging, short, practical. Keep answers concrete and supportive.
 
-Categories (use one): ${CATEGORIES.join(", ")}
+User Context (stringified):
+${JSON.stringify(
+  {
+    settings,
+    memory,
+    recentMessages,
+  },
+  null,
+  2
+)}
 
-${
-  action === "create_challenge"
-    ? `CRITICAL: RESPOND ONLY WITH JSON. NO EXTRA WORDS.
-Valid JSON keys: "title", "description", "category", "estimated_minutes", "difficulty", "benefit".
-- "category": one of [${CATEGORIES.join(", ")}]
-- "estimated_minutes": integer minutes (1–1440).`
-    : action === "feedback"
-    ? "Give one or two short encouraging sentences."
-    : "Greet briefly and ask one helpful question."
-}
-    `.trim();
+Behavior:
+- If NOT creating a challenge, reply in 1–2 sentences like a human coach. Do NOT output JSON.
+- Encourage tiny steps, reflect their preferences, and be kind.
+`;
 
-    // log user message
+    if (action === "create_challenge") {
+      systemPrompt += `
+When action=create_challenge:
+- Respond ONLY with a SINGLE JSON object, nothing else (no prose, no markdown).
+- Schema:
+  {
+    "title": "specific actionable task",
+    "description": "2 short sentences with clear instructions",
+    "category": "energy|mindset|focus|relationships|home|finance|creativity|recovery",
+    "estimated_minutes": <number>,   // 1..1439
+    "difficulty": <1-5>,
+    "benefit": "why this 1% matters - 1 sentence"
+  }
+- Meet any user-given duration if they provided one. Never invent a fixed 10/15/30 cap.
+`;
+    } else {
+      systemPrompt += `
+IMPORTANT: For this action, NEVER return JSON. Speak like a supportive human in plain text.`;
+    }
+
+    // --- Save user message for history
     if (message) {
-      await supabaseClient.from("trainer_messages").insert({
+      await supabase.from("trainer_messages").insert({
         user_id: user.id,
         message_type: "user",
         content: message,
       });
     }
 
-    const openaiKey =
-      Deno.env.get("OPENAI_API_KEY") || Deno.env.get("Looped") || "";
+    // --- OpenAI call
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || Deno.env.get("Looped");
+    let trainerResponse = "";
 
-    if (!openaiKey) {
-      return new Response(
-        JSON.stringify({
-          error: "Missing OPENAI_API_KEY",
-          response:
-            "Configuration issue: missing AI credentials. Please set OPENAI_API_KEY.",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+    if (!openaiApiKey) {
+      trainerResponse =
+        "I'm having trouble accessing coaching right now (missing API key). Please add OPENAI_API_KEY.";
+    } else {
+      try {
+        const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${openaiApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: message || "Hello!" },
+            ],
+            max_tokens: 450,
+            temperature: 0.6,
+          }),
+        });
+
+        if (!resp.ok) {
+          const t = await resp.text();
+          console.error("OpenAI error:", resp.status, t);
+          trainerResponse =
+            resp.status === 401
+              ? "There’s an issue with the AI credentials. Please verify the API key."
+              : "I'm experiencing technical issues. Try again in a moment.";
+        } else {
+          const data = await resp.json();
+          trainerResponse = data.choices?.[0]?.message?.content ?? "";
+        }
+      } catch (e) {
+        console.error("OpenAI fetch failed:", e);
+        trainerResponse = "I couldn't connect to AI services just now. Please try again.";
+      }
     }
 
-    // call OpenAI
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openaiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.6,
-        max_tokens: 400,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message || "Create a challenge." },
-        ],
-      }),
-    });
-
-    if (!aiRes.ok) {
-      const t = await aiRes.text();
-      console.error("OpenAI error", aiRes.status, t);
-      throw new Error("AI service unavailable");
-    }
-
-    const data = await aiRes.json();
-    const rawAssistant = data?.choices?.[0]?.message?.content ?? "";
-
-    // default visible response (non-creation paths)
-    let trainerVisible = rawAssistant;
-
-    // create-challenge: extract + normalize JSON, save custom-only, return JSON to UI
+    // --- If create_challenge: parse JSON, insert custom challenge, and replace reply with human text
     if (action === "create_challenge") {
-      const rawJson = extractJson(rawAssistant);
-      if (!rawJson) throw new Error("Challenge JSON not found in AI output.");
+      const parsed = tryParseJSONBlock(trainerResponse);
+      if (parsed && parsed.title && parsed.description) {
+        const title = String(parsed.title).slice(0, 140);
+        const description = String(parsed.description).slice(0, 2000);
+        const category = String(parsed.category || "mindset").toLowerCase();
+        const minutes = sanitizeMinutes(parsed.estimated_minutes ?? parsed.time_minutes ?? parsed.timeMinutes, 15);
+        const benefit = parsed.benefit ? String(parsed.benefit).slice(0, 300) : null;
 
-      const ch = normalizeChallenge(rawJson);
+        // Insert as a CUSTOM challenge row for this user
+        const { error: insertErr } = await supabase.from("user_challenges").insert({
+          user_id: user.id,
+          is_custom: true,
+          custom_title: title,
+          custom_description: description,
+          custom_category: category,
+          custom_time_minutes: minutes,
+          created_by: "trainer",
+          scheduled_date: new Date().toISOString().split("T")[0],
+          status: "pending",
+          feedback: null,
+          trainer_response: null,
+          notes: null,
+        });
 
-      // save as custom user challenge only
-      await supabaseClient.from("user_challenges").insert({
-        user_id: user.id,
-        is_custom: true,
-        created_by: "trainer",
-        custom_title: ch.title,
-        custom_description: ch.description,
-        custom_category: ch.category,
-        custom_time_minutes: ch.estimated_minutes,
-        status: "pending",
-        scheduled_date: new Date().toISOString().slice(0, 10),
-      });
-
-      // for the chat log, store JSON only (no chatty wrapper)
-      trainerVisible = JSON.stringify(ch, null, 2);
-
-      // also return the JSON payload so the client can render without parsing chat text
-      await supabaseClient.from("trainer_messages").insert({
-        user_id: user.id,
-        message_type: "trainer",
-        content: trainerVisible,
-      });
-
-      return new Response(
-        JSON.stringify({ response: ch, success: true }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+        if (insertErr) {
+          console.error("Insert custom challenge failed:", insertErr);
+          // Fall back: don't expose JSON blob—send neutral human text
+          trainerResponse =
+            "I drafted a challenge for you, but saving it had an issue. Please try again.";
+        } else {
+          // Replace the raw JSON with a clean human message
+          trainerResponse = `Added “${title}” (${minutes} min) in ${category}. Want to start it now or edit the time?`;
+        }
+      } else {
+        // Model didn't return valid JSON—send human fallback, not the blob
+        trainerResponse =
+          "I tried to create a challenge but the details were unclear. Tell me the category and minutes you want.";
+      }
     }
 
-    // non-creation paths: save trainer message as-is (short/coachy)
-    await supabaseClient.from("trainer_messages").insert({
+    // --- Save trainer message (always human-readable at this point)
+    await supabase.from("trainer_messages").insert({
       user_id: user.id,
       message_type: "trainer",
-      content: trainerVisible,
+      content: trainerResponse,
     });
 
-    // simple memory drop (optional)
-    if (message) {
-      await supabaseClient.from("trainer_memory").upsert({
+    // --- Optional: lightweight memory drop
+    if (message && message.length > 0) {
+      const memoryKey = `conversation_${Date.now()}`;
+      await supabase.from("trainer_memory").upsert({
         user_id: user.id,
         memory_type: "pattern",
-        key: `conversation_${Date.now()}`,
-        value: `User said: ${message}. Context: ${action}`,
+        key: memoryKey,
+        value: `User said: ${message}. Context: ${action || "general"}`,
       });
     }
 
-    return new Response(
-      JSON.stringify({ response: trainerVisible, success: true }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  } catch (err: any) {
-    console.error("ai-trainer failure", err?.message || err);
+    return new Response(JSON.stringify({ success: true, response: trainerResponse }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("ai-trainer fatal:", err);
     return new Response(
       JSON.stringify({
-        error: err?.message || "Unknown error",
-        response:
-          "I hit a snag processing that. Please try again in a moment.",
+        success: false,
+        error: String(err?.message || err),
+        response: "I'm having trouble right now. Please try again shortly.",
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
