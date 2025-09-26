@@ -80,17 +80,13 @@ export function useTrainer() {
     enabled: !!user,
   });
 
-  // Get today's challenge based on user's preferences and progress
-  const { data: todayChallenge, isLoading: challengeLoading } = useQuery({
-    queryKey: ['today-challenge'],
+  // Get all pending challenges
+  const { data: pendingChallenges = [], isLoading: challengeLoading } = useQuery({
+    queryKey: ['pending-challenges'],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.id) return [];
 
-      // Check if user has a pending challenge for today
-      const today = new Date().toISOString().split('T')[0];
-      
-      // First check for custom/scheduled challenges
-      const { data: customChallenge } = await supabase
+      const { data, error } = await supabase
         .from('user_challenges')
         .select(`
           *,
@@ -98,31 +94,24 @@ export function useTrainer() {
         `)
         .eq('user_id', user.id)
         .eq('status', 'pending')
-        .or(`scheduled_date.eq.${today},created_at.gte.${today}T00:00:00`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      if (customChallenge) {
-        // Format custom challenge to match expected structure
-        return {
-          id: customChallenge.id,
-          challenge_id: customChallenge.challenge_id,
-          title: customChallenge.custom_title || customChallenge.challenges?.title,
-          description: customChallenge.custom_description || customChallenge.challenges?.description,
-          category: customChallenge.custom_category || customChallenge.challenges?.category,
-          estimated_minutes: customChallenge.custom_time_minutes || customChallenge.challenges?.estimated_minutes || 15,
-          difficulty: customChallenge.challenges?.difficulty || 'medium',
-          benefit: customChallenge.challenges?.benefit || 'Builds consistency',
-          status: customChallenge.status,
-          user_challenge_id: customChallenge.id,
-          is_custom: customChallenge.is_custom,
-          created_by: customChallenge.created_by
-        };
-      }
+      if (error) throw error;
 
-      // No custom challenges found - return null to show empty state
-      return null;
+      return (data || []).map(challenge => ({
+        id: challenge.id,
+        challenge_id: challenge.challenge_id,
+        title: challenge.custom_title || challenge.challenges?.title || 'Custom Challenge',
+        description: challenge.custom_description || challenge.challenges?.description || '',
+        category: challenge.custom_category || challenge.challenges?.category || 'mindset',
+        estimated_minutes: challenge.custom_time_minutes || challenge.challenges?.estimated_minutes || 15,
+        difficulty: challenge.challenges?.difficulty || 'medium',
+        benefit: challenge.challenges?.benefit || 'Builds consistency',
+        status: challenge.status,
+        user_challenge_id: challenge.id,
+        is_custom: challenge.is_custom,
+        created_by: challenge.created_by
+      }));
     },
     enabled: !!user && !!trainerSettings && !settingsLoading
   });
@@ -247,7 +236,8 @@ export function useTrainer() {
   return {
     trainerSettings,
     subscription,
-    todayChallenge,
+    pendingChallenges,
+    todayChallenge: pendingChallenges[0] || null, // First challenge becomes "today's challenge"
     settingsLoading,
     challengeLoading,
     completeOnboarding,
