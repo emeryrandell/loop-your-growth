@@ -228,7 +228,7 @@ IMPORTANT: For this action, NEVER return JSON. Speak like a supportive human in 
     return new Response(
       JSON.stringify({
         success: false,
-        error: String(err?.message || err),
+        error: String(err instanceof Error ? err.message : err),
         response: "I'm having trouble right now. Please try again shortly.",
       }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

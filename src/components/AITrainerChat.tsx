@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Plus, Calendar } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
@@ -177,30 +177,7 @@ const AITrainerChat = () => {
         <div ref={messagesEndRef} />
       </ScrollArea>
 
-      <div className="p-4 border-t space-y-3 bg-muted/30">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleSendMessage('create_challenge')}
-            disabled={isLoading}
-            className="flex items-center gap-1 flex-1"
-          >
-            <Plus className="h-3 w-3" />
-            Create Challenge
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleSendMessage('schedule_challenge')}
-            disabled={isLoading}
-            className="flex items-center gap-1 flex-1"
-          >
-            <Calendar className="h-3 w-3" />
-            Plan Week
-          </Button>
-        </div>
-        
+      <div className="p-4 border-t bg-muted/30">
         <div className="flex gap-2">
           <Input
             value={message}
