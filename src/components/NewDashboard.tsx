@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTrainer } from "@/hooks/useTrainer";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -18,12 +19,14 @@ import CreateChallengeModal from "./CreateChallengeModal";
 import ShareCardGenerator from "./ShareCardGenerator";
 import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import InProgressChallenges from "./InProgressChallenges";
 
 const NewDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { 
     trainerSettings, 
     todayChallenge, 
@@ -39,7 +42,7 @@ const NewDashboard = () => {
   const [feedback, setFeedback] = useState<'too_easy' | 'just_right' | 'too_hard' | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [timeToggle, setTimeToggle] = useState(15);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
 
   // Fetch user streak data
@@ -172,12 +175,33 @@ const NewDashboard = () => {
     }
   };
 
-  const handleSwapChallenge = () => {
-    toast({
-      title: "Challenge swapped",
-      description: "Your trainer is finding a similar alternative...",
-    });
-    // TODO: Implement challenge swap logic
+  const handleDeleteChallenge = async () => {
+    if (!todayChallenge?.user_challenge_id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_challenges')
+        .delete()
+        .eq('id', todayChallenge.user_challenge_id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Challenge deleted",
+        description: "Challenge removed from your queue.",
+      });
+      
+      // Refresh the challenge data
+      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete challenge. Please try again.",
+        variant: "destructive"
+      });
+    }
+    setShowDeleteDialog(false);
   };
 
   const handleSnoozeChallenge = (minutes: number) => {
@@ -263,7 +287,7 @@ const NewDashboard = () => {
             </div>
 
             {/* Today's Challenge - Centerpiece */}
-            {todayChallenge && (
+            {todayChallenge ? (
               <Card className="card-feature relative border-2 border-primary/20 shadow-glow">
                 <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(todayChallenge.category)} rounded-l-lg`}></div>
                 <CardHeader className="pb-4">
@@ -276,19 +300,6 @@ const NewDashboard = () => {
                         >
                           {todayChallenge.category}
                         </Badge>
-                        <div className="flex items-center space-x-1">
-                          {[5, 15, 30].map((time) => (
-                            <Button
-                              key={time}
-                              variant={timeToggle === time ? "default" : "outline"}
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                              onClick={() => setTimeToggle(time)}
-                            >
-                              {time}m
-                            </Button>
-                          ))}
-                        </div>
                       </div>
                       <CardTitle className="text-2xl md:text-3xl font-bold mb-2">
                         {todayChallenge.title}
@@ -296,12 +307,6 @@ const NewDashboard = () => {
                       <p className="text-muted-foreground leading-relaxed">
                         {todayChallenge.description}
                       </p>
-                    </div>
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Target className="h-6 w-6 text-primary" />
-                      </div>
-                      <span className="text-xs text-muted-foreground">Level {todayChallenge.difficulty}</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -355,12 +360,7 @@ const NewDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => {
-                            toast({
-                              title: "Can't do this right now?",
-                              description: "No worries! Your coach will suggest an alternative or you can snooze it.",
-                            });
-                          }}
+                          onClick={() => setShowDeleteDialog(true)}
                         >
                           Can't do this?
                         </Button>
@@ -394,6 +394,24 @@ const NewDashboard = () => {
                       </div>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="card-feature border-2 border-dashed border-muted-foreground/30">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Plus className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">No Challenges Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create your first custom challenge to get started on your 1% improvement journey.
+                  </p>
+                  <CreateChallengeModal>
+                    <Button className="btn-hero">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Challenge
+                    </Button>
+                  </CreateChallengeModal>
                 </CardContent>
               </Card>
             )}
@@ -550,15 +568,36 @@ const NewDashboard = () => {
             todayChallenge.difficulty
         } : {
           id: '',
-          title: 'Default Challenge',
-          description: 'Complete today\'s 1% improvement',
+          title: 'Create a Challenge',
+          description: 'Add a custom challenge to get started',
           category: 'mindset',
           difficulty: 3,
-          estimated_minutes: timeToggle,
+          estimated_minutes: 15,
         }}
-        timeSelected={timeToggle}
+        timeSelected={15}
         onComplete={handleCompleteChallenge}
       />
+
+      {/* Delete Challenge Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Challenge?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this challenge? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Challenge</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteChallenge}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Challenge
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Share Card Dialog */}
       <Dialog open={showShareCard} onOpenChange={setShowShareCard}>
