@@ -20,7 +20,7 @@ const AuthPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const { signUp, signIn, signInWithGoogle } = useAuth();
+  const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -90,18 +90,6 @@ const AuthPage = () => {
     setLoading(false);
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError(null);
-    
-    const { error } = await signInWithGoogle();
-    
-    if (error) {
-      setError(error.message);
-    }
-    
-    setLoading(false);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
@@ -199,25 +187,6 @@ const AuthPage = () => {
                     {loading ? "Creating Account..." : "Start Your Journey"}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  
-                  <div className="relative w-full">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-muted" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-card text-muted-foreground">or</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                  >
-                    Continue with Google
-                  </Button>
                 </CardFooter>
               </form>
             </TabsContent>
@@ -266,25 +235,6 @@ const AuthPage = () => {
                   >
                     {loading ? "Signing In..." : "Sign In"}
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  
-                  <div className="relative w-full">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-muted" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-card text-muted-foreground">or</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                  >
-                    Continue with Google
                   </Button>
                   
                   <div className="text-center text-sm">
