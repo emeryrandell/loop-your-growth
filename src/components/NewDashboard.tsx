@@ -29,7 +29,6 @@ const NewDashboard = () => {
   const queryClient = useQueryClient();
   const { 
     trainerSettings, 
-    pendingChallenges,
     todayChallenge, 
     challengeLoading, 
     completeOnboarding, 
@@ -44,7 +43,6 @@ const NewDashboard = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [challengeToDelete, setChallengeToDelete] = useState<any>(null);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
 
   // Fetch user streak data
@@ -177,15 +175,14 @@ const NewDashboard = () => {
     }
   };
 
-  const handleDeleteChallenge = async (challengeToDelete?: any) => {
-    const challengeId = challengeToDelete?.user_challenge_id || todayChallenge?.user_challenge_id;
-    if (!challengeId) return;
+  const handleDeleteChallenge = async () => {
+    if (!todayChallenge?.user_challenge_id) return;
     
     try {
       const { error } = await supabase
         .from('user_challenges')
         .delete()
-        .eq('id', challengeId)
+        .eq('id', todayChallenge.user_challenge_id)
         .eq('user_id', user?.id);
 
       if (error) throw error;
@@ -196,7 +193,7 @@ const NewDashboard = () => {
       });
       
       // Refresh the challenge data
-      queryClient.invalidateQueries({ queryKey: ['pending-challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
     } catch (error) {
       toast({
         title: "Error",
@@ -289,155 +286,116 @@ const NewDashboard = () => {
               </div>
             </div>
 
-            {/* Challenges - Main Area */}
-            {pendingChallenges && pendingChallenges.length > 0 ? (
-              <div className="space-y-4">
-                {pendingChallenges.map((challenge, index) => (
-                  <Card 
-                    key={challenge.id} 
-                    className={`card-feature relative ${
-                      index === 0 
-                        ? 'border-2 border-primary/20 shadow-glow' 
-                        : 'border border-border/50'
-                    }`}
-                  >
-                    <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(challenge.category)} rounded-l-lg`}></div>
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <Badge 
-                              variant="outline" 
-                              className={`capitalize ${getCategoryColor(challenge.category)} text-white border-transparent`}
-                            >
-                              {challenge.category}
-                            </Badge>
-                            {index === 0 && (
-                              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                                Next Up
-                              </Badge>
-                            )}
-                          </div>
-                          <CardTitle className={`${index === 0 ? 'text-2xl md:text-3xl' : 'text-xl'} font-bold mb-2`}>
-                            {challenge.title}
-                          </CardTitle>
-                          <p className="text-muted-foreground leading-relaxed">
-                            {challenge.description}
-                          </p>
-                        </div>
+            {/* Today's Challenge - Centerpiece */}
+            {todayChallenge ? (
+              <Card className="card-feature relative border-2 border-primary/20 shadow-glow">
+                <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(todayChallenge.category)} rounded-l-lg`}></div>
+                <CardHeader className="pb-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Badge 
+                          variant="outline" 
+                          className={`capitalize ${getCategoryColor(todayChallenge.category)} text-white border-transparent`}
+                        >
+                          {todayChallenge.category}
+                        </Badge>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      {challenge.benefit && index === 0 && (
-                        <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
-                          <div className="flex items-start space-x-3">
-                            <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <span className="w-2 h-2 bg-success rounded-full"></span>
-                            </div>
-                            <p className="text-sm font-medium">
-                              <span className="text-success">Why this works:</span> {challenge.benefit}
-                            </p>
-                          </div>
+                      <CardTitle className="text-2xl md:text-3xl font-bold mb-2">
+                        {todayChallenge.title}
+                      </CardTitle>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {todayChallenge.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {todayChallenge.benefit && (
+                      <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="w-2 h-2 bg-success rounded-full"></span>
                         </div>
-                      )}
+                        <p className="text-sm font-medium">
+                          <span className="text-success">Why this works:</span> {todayChallenge.benefit}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {todayChallenge.status === 'completed' ? (
+                    <div className="text-center py-8 space-y-4">
+                      <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto">
+                        <Trophy className="h-8 w-8 text-success" />
+                      </div>
+                      <h4 className="text-xl font-semibold text-success">Challenge Complete!</h4>
+                      <p className="text-muted-foreground">
+                        Excellent work! Your coach is preparing tomorrow's challenge.
+                      </p>
+                      <div className="flex justify-center space-x-2 mt-4">
+                        <AddNoteModal>
+                          <Button variant="outline" size="sm">Add Note</Button>
+                        </AddNoteModal>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowShareCard(true)}
+                        >
+                          Share Win
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Button 
+                        onClick={() => setShowActionModal(true)}
+                        className="btn-hero w-full text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <Play className="h-5 w-5 mr-2" />
+                        Do It Now
+                      </Button>
                       
-                      {challenge.status === 'completed' ? (
-                        <div className="text-center py-8 space-y-4">
-                          <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto">
-                            <Trophy className="h-8 w-8 text-success" />
-                          </div>
-                          <h4 className="text-xl font-semibold text-success">Challenge Complete!</h4>
-                          <p className="text-muted-foreground">
-                            Excellent work! Your coach is preparing tomorrow's challenge.
-                          </p>
-                          <div className="flex justify-center space-x-2 mt-4">
-                            <AddNoteModal>
-                              <Button variant="outline" size="sm">Add Note</Button>
-                            </AddNoteModal>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setShowShareCard(true)}
-                            >
-                              Share Win
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {index === 0 ? (
-                            <>
-                              <Button 
-                                onClick={() => setShowActionModal(true)}
-                                className="btn-hero w-full text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                              >
-                                <Play className="h-5 w-5 mr-2" />
-                                Do It Now
-                              </Button>
-                              
-                              <div className="flex justify-center space-x-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => setShowDeleteDialog(true)}
-                                >
-                                  Can't do this?
-                                </Button>
-                              </div>
-                              
-                              <div className="grid grid-cols-3 gap-2 mt-4">
-                                <Button 
-                                  variant={feedback === 'too_easy' ? 'default' : 'ghost'} 
-                                  size="sm"
-                                  onClick={() => setFeedback('too_easy')}
-                                  className="text-xs"
-                                >
-                                  Too Easy
-                                </Button>
-                                <Button 
-                                  variant={feedback === 'just_right' ? 'default' : 'ghost'} 
-                                  size="sm"
-                                  onClick={() => setFeedback('just_right')}
-                                  className="text-xs"
-                                >
-                                  Just Right
-                                </Button>
-                                <Button 
-                                  variant={feedback === 'too_hard' ? 'default' : 'ghost'} 
-                                  size="sm"
-                                  onClick={() => setFeedback('too_hard')}
-                                  className="text-xs"
-                                >
-                                  Too Hard
-                                </Button>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                {challenge.estimated_minutes}m
-                              </div>
-                              <div className="flex space-x-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => {
-                                    setChallengeToDelete(challenge);
-                                    setShowDeleteDialog(true);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      <div className="flex justify-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowDeleteDialog(true)}
+                        >
+                          Can't do this?
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-2 mt-4">
+                        <Button 
+                          variant={feedback === 'too_easy' ? 'default' : 'ghost'} 
+                          size="sm"
+                          onClick={() => setFeedback('too_easy')}
+                          className="text-xs"
+                        >
+                          Too Easy
+                        </Button>
+                        <Button 
+                          variant={feedback === 'just_right' ? 'default' : 'ghost'} 
+                          size="sm"
+                          onClick={() => setFeedback('just_right')}
+                          className="text-xs"
+                        >
+                          Just Right
+                        </Button>
+                        <Button 
+                          variant={feedback === 'too_hard' ? 'default' : 'ghost'} 
+                          size="sm"
+                          onClick={() => setFeedback('too_hard')}
+                          className="text-xs"
+                        >
+                          Too Hard
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             ) : (
               <Card className="card-feature border-2 border-dashed border-muted-foreground/30">
                 <CardContent className="p-8 text-center">
@@ -632,7 +590,7 @@ const NewDashboard = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Challenge</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => handleDeleteChallenge(challengeToDelete)}
+              onClick={handleDeleteChallenge}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete Challenge
