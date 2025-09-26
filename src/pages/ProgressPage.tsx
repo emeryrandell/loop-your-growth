@@ -1,8 +1,11 @@
-import { Calendar, TrendingUp, Award, Share2, Trophy, Clock } from "lucide-react";
+import { useState } from "react";
+import { Calendar, TrendingUp, Award, Share2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
 import ProgressCard from "@/components/ProgressCard";
+import DoItNowModal from "@/components/DoItNowModal";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +13,14 @@ import { useAuth } from "@/contexts/AuthContext";
 const ProgressPage = () => {
   const { user } = useAuth();
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || "Looper";
-  
+
+  // === NEW: Create Challenge modal state ===
+  const [createOpen, setCreateOpen] = useState(false);
+  const handleChallengeComplete = () => {
+    // close modal; you can add a refetch here later
+    setCreateOpen(false);
+  };
+
   // Fetch user streak data
   const { data: streakData } = useQuery({
     queryKey: ['user-streak'],
@@ -120,13 +130,18 @@ const ProgressPage = () => {
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
-            {userName}'s Progress
-          </h1>
-          <p className="text-muted-foreground">
-            Track your journey and celebrate your wins
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
+              {userName}'s Progress
+            </h1>
+            <p className="text-muted-foreground">
+              Track your journey and celebrate your wins
+            </p>
+          </div>
+          <Button className="btn-hero" onClick={() => setCreateOpen(true)}>
+            Create Challenge
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -145,7 +160,7 @@ const ProgressPage = () => {
                     {streak.current_streak} days
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Keep it going! You're building great momentum
+                    Keep it going! You're on fire 🔥
                   </p>
                 </CardContent>
               </Card>
@@ -206,40 +221,51 @@ const ProgressPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentChallenges.map((challenge, index) => (
-                    <div
-                      key={challenge.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                          {totalChallenges - index}
-                        </div>
+                  {recentChallenges.length === 0 ? (
+                    <Card className="card-feature text-center py-12">
+                      <CardContent className="space-y-4">
+                        <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                        <h3 className="text-lg font-semibold">No challenges yet</h3>
+                        <p className="text-muted-foreground">
+                          Create your first challenge with exactly the time you want.
+                        </p>
                         <div>
-                          <h4 className="font-medium">
-                            {challenge.custom_title || challenge.challenges?.title || "Challenge"}
-                          </h4>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge 
-                              variant={challenge.challenges?.difficulty === '1' || challenge.challenges?.difficulty === '2' ? 'secondary' : 'default'}
-                              className="text-xs capitalize"
-                            >
-                              {challenge.challenges?.category || challenge.custom_category || "General"}
-                            </Badge>
+                          <Button className="btn-hero" onClick={() => setCreateOpen(true)}>
+                            Add Challenge
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    recentChallenges.map((challenge, index) => (
+                      <div
+                        key={challenge.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                            {totalChallenges - index}
+                          </div>
+                          <div>
+                            <h4 className="font-medium">
+                              {challenge.custom_title || challenge.challenges?.title || "Challenge"}
+                            </h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge 
+                                variant={challenge.challenges?.difficulty === '1' || challenge.challenges?.difficulty === '2' ? 'secondary' : 'default'}
+                                className="text-xs capitalize"
+                              >
+                                {challenge.challenges?.category || challenge.custom_category || "General"}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
+                        <div className="text-xl">
+                          {challenge.status === 'completed' ? "✅" : challenge.status === 'snoozed' ? "⏸️" : "❌"}
+                        </div>
                       </div>
-                      <div className="text-xl flex items-center gap-2">
-                        {challenge.status === 'completed' ? (
-                          <Trophy className="h-5 w-5 text-success" />
-                        ) : challenge.status === 'snoozed' ? (
-                          <Clock className="h-5 w-5 text-accent" />
-                        ) : (
-                          <span className="w-5 h-5 rounded-full bg-destructive/20"></span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -265,6 +291,15 @@ const ProgressPage = () => {
           </div>
         </div>
       </div>
+
+      {/* === NEW: Mount Create Mode modal === */}
+      <DoItNowModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        challenge={null}          // Create Mode — your updated modal should ask for category + any duration
+        timeSelected={15}         // default only; user can set any minutes/hours inside the modal
+        onComplete={handleChallengeComplete}
+      />
     </div>
   );
 };
