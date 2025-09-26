@@ -21,11 +21,16 @@ interface DoItNowModalProps {
   onOpenChange: (open: boolean) => void;
   challenge: {
     id: string;
-    title: string;
-    description: string;
-    category: string;
-    difficulty: number;
-    estimated_minutes: number;
+    custom_title?: string;
+    custom_description?: string;
+    custom_category?: string;
+    custom_time_minutes?: number;
+    // Legacy fields for backward compatibility
+    title?: string;
+    description?: string;
+    category?: string;
+    difficulty?: number;
+    estimated_minutes?: number;
     benefit?: string;
   } | null;
   timeSelected: number;               // default minutes if challenge is null or missing minutes
@@ -39,10 +44,11 @@ const DoItNowModal = ({
   timeSelected, 
   onComplete 
 }: DoItNowModalProps) => {
-  // derive initial minutes from challenge or fallback
+  // derive initial minutes from challenge (custom first, then legacy) or fallback
   const initialMins = Math.max(
     1,
     Math.round(
+      challenge?.custom_time_minutes ??
       challenge?.estimated_minutes ??
       timeSelected ??
       10
@@ -66,14 +72,19 @@ const DoItNowModal = ({
   useEffect(() => {
     const m = Math.max(
       1,
-      Math.round(challenge?.estimated_minutes ?? timeSelected ?? 10)
+      Math.round(
+        challenge?.custom_time_minutes ?? 
+        challenge?.estimated_minutes ?? 
+        timeSelected ?? 
+        10
+      )
     );
     setHours(Math.floor(m / 60));
     setMins(m % 60);
     setTimerState('ready');
     setTimeRemaining(m * 60);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [challenge?.estimated_minutes, timeSelected, open]);
+  }, [challenge?.custom_time_minutes, challenge?.estimated_minutes, timeSelected, open]);
 
   // When user edits duration, update clock if not running
   useEffect(() => {
@@ -187,9 +198,9 @@ const DoItNowModal = ({
     );
   };
 
-  const title = challenge?.title ?? "Your Custom Focus";
-  const desc  = challenge?.description ?? "Set a clear intention, then start your focus timer.";
-  const cat   = challenge?.category ?? "focus";
+  const title = challenge?.custom_title ?? challenge?.title ?? "Your Custom Focus";
+  const desc  = challenge?.custom_description ?? challenge?.description ?? "Set a clear intention, then start your focus timer.";
+  const cat   = challenge?.custom_category ?? challenge?.category ?? "focus";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,7 +21,8 @@ const CreateChallengeModal = ({ children }: CreateChallengeModalProps) => {
     title: "",
     description: "",
     category: "mindset",
-    timeMinutes: 15
+    hours: 0,
+    minutes: 15
   });
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,7 +54,7 @@ const CreateChallengeModal = ({ children }: CreateChallengeModalProps) => {
           custom_title: formData.title,
           custom_description: formData.description,
           custom_category: formData.category,
-          custom_time_minutes: formData.timeMinutes,
+          custom_time_minutes: formData.hours * 60 + formData.minutes,
           status: 'pending',
           created_by: 'user',
           scheduled_date: new Date().toISOString().split('T')[0]
@@ -69,7 +70,8 @@ const CreateChallengeModal = ({ children }: CreateChallengeModalProps) => {
         title: "",
         description: "",
         category: "mindset",
-        timeMinutes: 15
+        hours: 0,
+        minutes: 15
       });
       setIsOpen(false);
 
@@ -141,19 +143,35 @@ const CreateChallengeModal = ({ children }: CreateChallengeModalProps) => {
           </div>
 
           <div>
-            <Label htmlFor="time">Time Needed (minutes)</Label>
-            <div className="mt-2">
-              <Slider
-                value={[formData.timeMinutes]}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, timeMinutes: value[0] }))}
-                max={60}
-                min={5}
-                step={5}
-                className="mb-2"
-              />
-              <div className="text-sm text-muted-foreground text-center">
-                {formData.timeMinutes} minutes
+            <Label htmlFor="time">Time Needed</Label>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <div>
+                <Label htmlFor="hours" className="text-sm">Hours</Label>
+                <Input
+                  id="hours"
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={formData.hours}
+                  onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
+                  className="mt-1"
+                />
               </div>
+              <div>
+                <Label htmlFor="minutes" className="text-sm">Minutes</Label>
+                <Input
+                  id="minutes"
+                  type="number"
+                  min="1"
+                  max="59"
+                  value={formData.minutes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, minutes: parseInt(e.target.value) || 1 }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground text-center mt-2">
+              Total: {formData.hours > 0 ? `${formData.hours}h ` : ''}{formData.minutes}m
             </div>
           </div>
 

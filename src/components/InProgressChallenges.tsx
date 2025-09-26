@@ -129,10 +129,11 @@ const InProgressChallenges = () => {
                   <Badge variant="outline" className="text-xs capitalize">
                     {challenge.custom_category || 'mindset'}
                   </Badge>
-                  {challenge.custom_time_minutes && (
+                  {challenge?.custom_time_minutes && (
                     <div className="flex items-center text-xs text-muted-foreground">
                       <Clock className="h-3 w-3 mr-1" />
-                      {challenge.custom_time_minutes}m
+                      {Math.floor(challenge.custom_time_minutes / 60) > 0 ? `${Math.floor(challenge.custom_time_minutes / 60)}h ` : ''}
+                      {challenge.custom_time_minutes % 60}m
                     </div>
                   )}
                 </div>

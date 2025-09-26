@@ -236,7 +236,7 @@ serve(async (req) => {
       const parsed = parseIntent(message);
       if (parsed.shouldCreate) {
         action = "create_challenge";
-        if (!hints.category) hints.category = parsed.category;
+        if (!hints.category) hints.category = clampCategory(parsed.category);
         if (!hints.minutes) hints.minutes = parsed.minutes;
       }
     }
