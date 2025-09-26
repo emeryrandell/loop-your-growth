@@ -19,6 +19,12 @@ import ShareCardGenerator from "./ShareCardGenerator";
 import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import InProgressChallenges from "./InProgressChallenges";
+import { useState, useMemo } from "react";
+import DoItNowModal from "@/components/DoItNowModal";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Timer, Share2, Sparkles, Target, Flame } from "lucide-react";
 
 const NewDashboard = () => {
   const { user } = useAuth();
