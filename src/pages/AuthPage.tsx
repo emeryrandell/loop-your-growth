@@ -9,6 +9,36 @@ import { ArrowRight, Mail, Lock, User, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+const [resetOpen, setResetOpen] = useState(false);
+const [resetEmail, setResetEmail] = useState("");
+
+const sendReset = async (e?: React.FormEvent) => {
+  e?.preventDefault();
+  const targetEmail = (resetEmail || email).trim();
+  if (!targetEmail) {
+    setError("Enter your email to receive a reset link.");
+    return;
+  }
+  setLoading(true);
+  setError(null);
+
+  const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+    redirectTo: `${window.location.origin}/auth`, // comes back here
+  });
+
+  setLoading(false);
+  if (error) {
+    setError(error.message);
+    return;
+  }
+  toast({
+    title: "Check your inbox",
+    description: `We sent a reset link to ${targetEmail}.`,
+  });
+  setResetOpen(false);
+};
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -246,29 +276,46 @@ const AuthPage = () => {
                       <span className="px-2 bg-card text-muted-foreground">or</span>
                     </div>
                   </div>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                  >
-                    Continue with Google
-                  </Button>
-                  
                   <div className="text-center text-sm">
-                    <a href="#" className="text-primary hover:underline">
-                      Forgot your password?
-                    </a>
-                  </div>
-                </CardFooter>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </Card>
+                    <button
+  type="button"
+  onClick={() => setResetOpen(true)}
+  className="text-primary hover:underline"
+  disabled={loading}
+>
+  Forgot your password?
+</button>
         
         <div className="text-center">
+
+          <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+  <DialogContent className="max-w-sm">
+    <DialogHeader>
+      <DialogTitle>Reset your password</DialogTitle>
+      <DialogDescription>We’ll email you a secure link to set a new password.</DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-3">
+      <Label htmlFor="reset-email">Email</Label>
+      <div className="relative">
+        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          id="reset-email"
+          type="email"
+          placeholder="you@example.com"
+          value={resetEmail}
+          onChange={(e) => setResetEmail(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      <Button onClick={sendReset} className="w-full btn-hero" disabled={loading}>
+        {loading ? "Sending..." : "Send reset link"}
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
+
           <Button variant="ghost" onClick={() => navigate("/")} className="text-muted-foreground">
             ← Back to Home
           </Button>
