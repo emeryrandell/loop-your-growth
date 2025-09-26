@@ -222,6 +222,7 @@ Be supportive and concise (1–2 sentences). Reference streak/progress if helpfu
     return json({ response: trainerResponse, success: true });
   } catch (e) {
     console.error("ai-trainer fatal:", e);
-    return json({ error: String(e?.message ?? e), response: "Something went wrong." }, 500);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return json({ error: errorMessage, response: "Something went wrong." }, 500);
   }
 });
