@@ -177,6 +177,150 @@ function fallbackChallenge(category: string | null, minutes: number | null) {
 }
 
 /* ---------------- main handler ---------------- */
+async function sendCustomResetEmail({
+  supabaseClient,
+  email,
+  redirectTo,
+}: {
+  supabaseClient: ReturnType<typeof createClient>;
+  email: string;
+  redirectTo: string;
+}) {
+  // 1) Generate a one-time recovery link
+  const { data, error } = await supabaseClient.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo },
+  });
+  if (error) throw error;
+  const resetUrl = data?.action_link;
+  if (!resetUrl) throw new Error("Could not generate reset link");
+
+  // 2) Send via your email provider (Resend example)
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Looped <no-reply@yourdomain.com>";
+  if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY secret");
+
+  const html = `
+  <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;">
+    <div style="max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:16px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:24px;font-weight:700;letter-spacing:0.2px">Looped</div>
+      </div>
+      <h2 style="margin:0 0 8px 0;font-size:20px">Reset your password</h2>
+      <p style="color:#6b7280;line-height:1.6;margin:0 0 16px 0">
+        Tap the button below to set a new password for your Looped account.
+        This link will expire shortly for security.
+      </p>
+      <div style="text-align:center;margin:24px 0">
+        <a href="${resetUrl}"
+           style="display:inline-block;padding:12px 20px;background:#0ea5e9;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600">
+          Reset password
+        </a>
+      </div>
+      <p style="color:#6b7280;line-height:1.6;margin-top:16px">
+        If the button doesn’t work, copy and paste this URL into your browser:<br/>
+        <span style="word-break:break-all;color:#111827">${resetUrl}</span>
+      </p>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+      <p style="color:#9ca3af;font-size:12px;margin:0">
+        You’re receiving this email because someone requested a password reset for this address on Looped.
+        If this wasn’t you, you can safely ignore it.
+      </p>
+    </div>
+  </div>`;
+
+  const resp = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [email],
+      subject: "Reset your Looped password",
+      html,
+    }),
+  });
+
+  if (!resp.ok) {
+    const t = await resp.text();
+    throw new Error(`Email send failed: ${resp.status} ${t}`);
+  }
+}
+async function sendCustomResetEmail({
+  supabaseClient,
+  email,
+  redirectTo,
+}: {
+  supabaseClient: ReturnType<typeof createClient>;
+  email: string;
+  redirectTo: string;
+}) {
+  // 1) Generate a one-time recovery link
+  const { data, error } = await supabaseClient.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo },
+  });
+  if (error) throw error;
+  const resetUrl = data?.action_link;
+  if (!resetUrl) throw new Error("Could not generate reset link");
+
+  // 2) Send via your email provider (Resend example)
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Looped <no-reply@yourdomain.com>";
+  if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY secret");
+
+  const html = `
+  <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;">
+    <div style="max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:16px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:24px;font-weight:700;letter-spacing:0.2px">Looped</div>
+      </div>
+      <h2 style="margin:0 0 8px 0;font-size:20px">Reset your password</h2>
+      <p style="color:#6b7280;line-height:1.6;margin:0 0 16px 0">
+        Tap the button below to set a new password for your Looped account.
+        This link will expire shortly for security.
+      </p>
+      <div style="text-align:center;margin:24px 0">
+        <a href="${resetUrl}"
+           style="display:inline-block;padding:12px 20px;background:#0ea5e9;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600">
+          Reset password
+        </a>
+      </div>
+      <p style="color:#6b7280;line-height:1.6;margin-top:16px">
+        If the button doesn’t work, copy and paste this URL into your browser:<br/>
+        <span style="word-break:break-all;color:#111827">${resetUrl}</span>
+      </p>
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+      <p style="color:#9ca3af;font-size:12px;margin:0">
+        You’re receiving this email because someone requested a password reset for this address on Looped.
+        If this wasn’t you, you can safely ignore it.
+      </p>
+    </div>
+  </div>`;
+
+  const resp = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [email],
+      subject: "Reset your Looped password",
+      html,
+    }),
+  });
+
+  if (!resp.ok) {
+    const t = await resp.text();
+    throw new Error(`Email send failed: ${resp.status} ${t}`);
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
