@@ -192,4 +192,23 @@ All colors MUST be HSL for proper theming.
     0% { box-shadow: 0 0 20px hsl(var(--primary) / 0.2); }
     100% { box-shadow: 0 0 30px hsl(var(--primary) / 0.4); }
   }
+  @layer utilities {
+  /* page container so content isn’t glued to the edges */
+  .site-container { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+  /* top padding so content never hides under a sticky/fixed header */
+  .pt-header { padding-top: var(--header-h, 64px); }
+}
+
+@layer components {
+  /* optional class for your header wrapper */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    height: var(--header-h, 64px);
+    z-index: 60;
+    backdrop-filter: saturate(180%) blur(8px);
+    background: hsl(var(--background) / 0.85);
+    border-bottom: 1px solid hsl(var(--border));
+  }
 }
