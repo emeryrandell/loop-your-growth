@@ -4,24 +4,27 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// 👉 Replace this with your current Replit URL if it changes
+// Replit gives you a public URL like:
+// 5bf22256-a2b2-4f77-8a4e-2b86b168b286-00-grgnq6re9vqn.riker.replit.dev
+// Paste that exact host here (or set env PUBLIC_HOST in Replit Secrets)
 const PUBLIC_HOST =
   process.env.PUBLIC_HOST ||
   "5bf22256-a2b2-4f77-8a4e-2b86b168b286-00-grgnq6re9vqn.riker.replit.dev";
 
+// If your Repl URL changes, update PUBLIC_HOST or set it in Secrets.
 export default defineConfig(({ mode }) => ({
   server: {
-    host: true,                                // listen on 0.0.0.0 / ::
-    port: Number(process.env.PORT) || 8080,    // Replit sets PORT
+    host: true,                                // 0.0.0.0 / ::
+    port: Number(process.env.PORT) || 8080,
+    // ✅ The important bit
     allowedHosts: [
       "localhost",
       "127.0.0.1",
       PUBLIC_HOST,
-      // the two below are handy if you spin up another Repl
-      ".repl.co",
-      ".replit.dev",
+      // wildcard-ish allowances for Replit subdomains
+      "repl.co",
+      "replit.dev",
     ],
-    // HMR over WSS so live reload works through Replit's proxy
     hmr: {
       host: PUBLIC_HOST,
       protocol: "wss",
