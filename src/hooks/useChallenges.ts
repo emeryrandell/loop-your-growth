@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+/** DB types (expanded for custom entries) */
 export interface Challenge {
   id: string;
   category: string;
@@ -17,13 +18,29 @@ export interface Challenge {
 export interface UserChallenge {
   id: string;
   user_id: string;
-  challenge_id: string;
-  status: 'pending' | 'completed' | 'snoozed' | 'skipped';
-  completion_date?: string;
-  feedback?: string;
-  trainer_response?: string;
-  notes?: string;
-  challenge?: Challenge;
+  // legacy relation-based
+  challenge_id?: string | null;
+  challenge?: Challenge | null;
+
+  // NEW: custom/template/trainer fields
+  is_custom?: boolean;
+  created_by?: "trainer" | "template" | "user" | string;
+
+  custom_title?: string | null;
+  custom_description?: string | null;
+  custom_category?: string | null;
+  custom_time_minutes?: number | null;
+
+  // common
+  status: "pending" | "completed" | "snoozed" | "skipped" | "active";
+  scheduled_date?: string | null;
+  completion_date?: string | null;
+  feedback?: string | null;
+  trainer_response?: string | null;
+  notes?: string | null;
+
+  // metadata
+  created_at?: string;
 }
 
 export interface UserStreak {
@@ -38,185 +55,189 @@ export function useChallenges() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get user's current day based on their challenge history
+  /** Helper to refresh everything challenge-related */
+  const refetchAll = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["today-challenge", user?.id] }),
+      queryClient.invalidateQueries({ queryKey: ["challenge-history", user?.id] }),
+      queryClient.invalidateQueries({ queryKey: ["streak", user?.id] }),
+      queryClient.invalidateQueries({ queryKey: ["current-day", user?.id] }),
+    ]);
+  };
+
+  /** Current day (kept for compatibility with any UI that still uses it) */
   const { data: currentDay = 1 } = useQuery({
-    queryKey: ['current-day', user?.id],
+    queryKey: ["current-day", user?.id],
     queryFn: async () => {
       if (!user) return 1;
-      
+
       const { data, error } = await supabase
-        .from('user_challenges')
-        .select('challenge_id, challenges(day_number)')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .order('completion_date', { ascending: false })
+        .from("user_challenges")
+        .select("challenge_id, challenges(day_number)")
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .order("completion_date", { ascending: false })
         .limit(1);
-      
+
       if (error) throw error;
-      
+
       if (data && data.length > 0) {
         const lastCompletedDay = (data[0] as any).challenges?.day_number || 0;
         return lastCompletedDay + 1;
       }
-      
       return 1;
     },
     enabled: !!user,
   });
 
-  // Get user's streak
+  /** Streak (existing table-based approach kept) */
   const { data: streak = { current_streak: 0, longest_streak: 0 } } = useQuery({
-    queryKey: ['streak', user?.id],
+    queryKey: ["streak", user?.id],
     queryFn: async () => {
       if (!user) return { current_streak: 0, longest_streak: 0 };
-      
+
       const { data, error } = await supabase
-        .from('streaks')
-        .select('*')
-        .eq('user_id', user.id)
+        .from("streaks")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      
+
+      if (error && error.code !== "PGRST116") throw error;
       return data || { current_streak: 0, longest_streak: 0 };
     },
     enabled: !!user,
   });
 
-  // Get user's profile for preferred track
+  /** Profile (unchanged) */
   const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== "PGRST116") throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Get today's challenge
-  const { data: todayChallenge, isLoading: todayChallengeLoading } = useQuery({
-    queryKey: ['today-challenge', user?.id, currentDay],
+  /**
+   * TODAY/PENDING: no more auto-creating random challenges.
+   * We just fetch the most recent pending/active user_challenges (custom or linked).
+   */
+  const {
+    data: todayChallenge,
+    isLoading: todayChallengeLoading,
+    error: todayErr,
+  } = useQuery({
+    queryKey: ["today-challenge", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
-      const track = profile?.preferred_track || 'mindset';
-      
-      // First, try to get an existing user challenge for today
-      const { data: existingChallenge, error: existingError } = await supabase
-        .from('user_challenges')
-        .select(`
-          *,
-          challenges (*)
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
+      const { data, error } = await supabase
+        .from("user_challenges")
+        .select(`*, challenges(*)`)
+        .eq("user_id", user.id)
+        .in("status", ["pending", "active"])
+        .order("created_at", { ascending: false })
         .limit(1)
-        .single();
-      
-      if (!existingError && existingChallenge) {
-        return existingChallenge;
-      }
-      
-      // If no existing challenge, create a new one
-      const { data: challenges, error: challengesError } = await supabase
-        .from('challenges')
-        .select('*')
-        .eq('category', 'mindset')
-        .eq('day_number', Math.min(currentDay, 5))
-        .limit(1);
-      
-      if (challengesError || !challenges || challenges.length === 0) {
-        return null;
-      } 
+        .maybeSingle();
 
-      const selectedChallenge = challenges[0];
-      const { data: newUserChallenge, error: createError } = await supabase
-        .from('user_challenges')
-        .insert({
-          user_id: user.id,
-          challenge_id: selectedChallenge.id,
-          status: 'pending'
-        })
-        .select(`
-          *,
-          challenges (*)
-        `)
-        .single();
-      
-      if (createError) throw createError;
-      return newUserChallenge;
-      
-      return null;
+      if (error && error.code !== "PGRST116") throw error;
+      return data || null;
     },
     enabled: !!user,
   });
 
-  // Get challenge history
+  if (todayErr) {
+    console.error("today-challenge error:", todayErr);
+  }
+
+  /** History list (shows both custom and linked) */
   const { data: challengeHistory = [] } = useQuery({
-    queryKey: ['challenge-history', user?.id],
+    queryKey: ["challenge-history", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
       const { data, error } = await supabase
-        .from('user_challenges')
-        .select(`
-          *,
-          challenges (*)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(30);
-      
+        .from("user_challenges")
+        .select(`*, challenges(*)`)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
       if (error) throw error;
       return data || [];
     },
     enabled: !!user,
   });
 
-  // Complete challenge mutation
+  /**
+   * CREATE via Coach (Edge Function ai-trainer).
+   * Server does the insert; we just invalidate + show toast.
+   */
+  const createChallengeFromCoach = async (
+    message: string,
+    payload?: { time_minutes?: number; category?: string; goal?: string }
+  ) => {
+    if (!user) throw new Error("Not authenticated");
+
+    const { data, error } = await supabase.functions.invoke("ai-trainer", {
+      body: { action: "general", message, payload },
+    });
+
+    if (error) {
+      throw new Error(error.message || "Coach error");
+    }
+
+    // If the coach returned human text, fine; if it created a challenge,
+    // the server already inserted. We just refresh the queries.
+    await refetchAll();
+
+    // Return the raw response in case the UI wants to show it.
+    return data?.response as string | undefined;
+  };
+
+  /** Complete challenge */
   const completeChallenge = useMutation({
-    mutationFn: async ({ challengeId, feedback, notes }: { 
-      challengeId: string; 
-      feedback?: string; 
+    mutationFn: async ({
+      challengeId,
+      feedback,
+      notes,
+    }: {
+      challengeId: string;
+      feedback?: string;
       notes?: string;
     }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
-      // Update the user challenge
       const { error: updateError } = await supabase
-        .from('user_challenges')
+        .from("user_challenges")
         .update({
-          status: 'completed',
+          status: "completed",
           completion_date: new Date().toISOString(),
           feedback,
-          notes
+          notes,
         })
-        .eq('id', challengeId)
-        .eq('user_id', user.id);
+        .eq("id", challengeId)
+        .eq("user_id", user.id);
 
       if (updateError) throw updateError;
 
-      // Update streak
-      const today = new Date().toISOString().split('T')[0];
+      // Streak maintenance (unchanged)
+      const today = new Date().toISOString().split("T")[0];
       const { data: existingStreak, error: streakError } = await supabase
-        .from('streaks')
-        .select('*')
-        .eq('user_id', user.id)
+        .from("streaks")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
 
-      if (streakError && streakError.code !== 'PGRST116') throw streakError;
+      if (streakError && streakError.code !== "PGRST116") throw streakError;
 
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
 
       let newStreak = 1;
       let newLongestStreak = 1;
@@ -224,52 +245,45 @@ export function useChallenges() {
       if (existingStreak) {
         const lastDate = existingStreak.last_completion_date;
         if (lastDate === yesterdayStr) {
-          // Continue streak
           newStreak = existingStreak.current_streak + 1;
         } else if (lastDate === today) {
-          // Already completed today, don't update
+          // Already completed today — no change
           return;
         } else {
-          // Streak broken, restart
           newStreak = 1;
         }
+
         newLongestStreak = Math.max(newStreak, existingStreak.longest_streak);
 
         const { error: updateStreakError } = await supabase
-          .from('streaks')
+          .from("streaks")
           .update({
             current_streak: newStreak,
             longest_streak: newLongestStreak,
             last_completion_date: today,
-            streak_start_date: newStreak === 1 ? today : existingStreak.streak_start_date
+            streak_start_date:
+              newStreak === 1 ? today : existingStreak.streak_start_date,
           })
-          .eq('user_id', user.id);
+          .eq("user_id", user.id);
 
         if (updateStreakError) throw updateStreakError;
       } else {
-        // Create new streak
-        const { error: createStreakError } = await supabase
-          .from('streaks')
-          .insert({
-            user_id: user.id,
-            current_streak: 1,
-            longest_streak: 1,
-            last_completion_date: today,
-            streak_start_date: today
-          });
-
+        const { error: createStreakError } = await supabase.from("streaks").insert({
+          user_id: user.id,
+          current_streak: 1,
+          longest_streak: 1,
+          last_completion_date: today,
+          streak_start_date: today,
+        });
         if (createStreakError) throw createStreakError;
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Challenge Completed!",
         description: "Great job! Your streak has been updated.",
       });
-      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
-      queryClient.invalidateQueries({ queryKey: ['streak'] });
-      queryClient.invalidateQueries({ queryKey: ['challenge-history'] });
-      queryClient.invalidateQueries({ queryKey: ['current-day'] });
+      await refetchAll();
     },
     onError: (error) => {
       toast({
@@ -277,40 +291,45 @@ export function useChallenges() {
         description: "Failed to complete challenge. Please try again.",
         variant: "destructive",
       });
-      console.error('Complete challenge error:', error);
+      console.error("Complete challenge error:", error);
     },
   });
 
-  // Snooze challenge mutation
+  /** Snooze */
   const snoozeChallenge = useMutation({
     mutationFn: async (challengeId: string) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error("Not authenticated");
 
       const { error } = await supabase
-        .from('user_challenges')
-        .update({ status: 'snoozed' })
-        .eq('id', challengeId)
-        .eq('user_id', user.id);
+        .from("user_challenges")
+        .update({ status: "snoozed" })
+        .eq("id", challengeId)
+        .eq("user_id", user.id);
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Challenge Snoozed",
         description: "No worries! Try again tomorrow.",
       });
-      queryClient.invalidateQueries({ queryKey: ['today-challenge'] });
+      await refetchAll();
     },
   });
 
   return {
+    /** data */
     currentDay,
     streak,
     profile,
     todayChallenge,
     todayChallengeLoading,
     challengeHistory,
+
+    /** actions */
+    createChallengeFromCoach,
     completeChallenge,
     snoozeChallenge,
+    refetchAll,
   };
 }
