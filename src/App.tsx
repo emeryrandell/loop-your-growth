@@ -389,27 +389,24 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-  {/* push content below header and add consistent page gutters */}
-  <div className="min-h-screen bg-background pt-header">
-    <main className="site-container py-6 md:py-8">
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/features" element={<FeaturesPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/faq" element={<FAQPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/progress" element={<ProgressPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/insights" element={<InsightsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </main>
+          <div className="min-h-screen bg-background">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/progress" element={<ProgressPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/insights" element={<InsightsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
 
-    {/* shows on every page */}
-    <CoachFab />
-  </div>
+            {/* shows on every page */}
+            <CoachFab />
+          </div>
 </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

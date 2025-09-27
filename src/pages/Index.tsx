@@ -7,10 +7,10 @@ const Index = () => {
   const userName = null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navigation isAuthenticated={isAuthenticated} userName={userName} />
       <LandingPage />
-    </div>
+    </>
   );
 };
 
