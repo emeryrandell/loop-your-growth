@@ -1,100 +1,44 @@
-// src/pages/AuthPage.tsx
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, Mail, Lock, User, AlertCircle } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 const AuthPage = () => {
-  const { signUp, signIn, user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { toast } = useToast();
-
-  // Auth form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [loading, setLoading] = useState(false);   // sign up / sign in
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset flow state
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const [resetting, setResetting] = useState(false); // sending email
 
-  // Set-new-password flow (after clicking email link)
-  const [showSetNew, setShowSetNew] = useState(false);
-  const [newPass, setNewPass] = useState("");
-  const [newPass2, setNewPass2] = useState("");
-  const [settingNew, setSettingNew] = useState(false);
+  const { signUp, signIn } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Detect ?mode=reset to show "Set New Password" dialog
+  // If the magic link includes tokens in the URL hash, set the session.
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const mode = params.get("mode");
-    if (mode === "reset") {
-      setShowSetNew(true);
-      setResetOpen(false);
+    if (window.location.hash.includes("access_token")) {
+      const qs = new URLSearchParams(window.location.hash.slice(1));
+      const access_token = qs.get("access_token");
+      const refresh_token = qs.get("refresh_token");
+      if (access_token && refresh_token) {
+        supabase.auth.setSession({ access_token, refresh_token }).catch(() => {});
+      }
     }
-  }, [location.search]);
+  }, []);
 
-  // If user logs in during reset flow, take them to dashboard
-  useEffect(() => {
-    if (user && showSetNew === false) {
-      // nothing special; normal flow
-    }
-  }, [user, showSetNew]);
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const { error } = await signUp(email, password, fullName);
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    toast({
-      title: "Account created!",
-      description: "Check your email to confirm your account.",
-    });
-    navigate("/dashboard");
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const { error } = await signIn(email, password);
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    toast({
-      title: "Welcome back!",
-      description: "Signed in successfully.",
-    });
-    navigate("/dashboard");
-  };
-
-  // Send reset email via your Edge Function (custom HTML via Resend)
+  // Use the Edge Function so we can send a custom email via Resend
   const sendReset = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const targetEmail = (resetEmail || email).trim();
@@ -102,62 +46,51 @@ const AuthPage = () => {
       setError("Enter your email to receive a reset link.");
       return;
     }
-
-    setResetting(true);
+    setLoading(true);
     setError(null);
 
     const redirectTo = `${window.location.origin}/auth?mode=reset`;
-
     const { data, error } = await supabase.functions.invoke("ai-trainer", {
       body: { action: "send_password_reset", email: targetEmail, redirectTo },
     });
 
-    setResetting(false);
-
-    if (error) {
-      setError(error.message || "Could not send reset email. Try again.");
+    setLoading(false);
+    if (error || !data?.success) {
+      setError(error?.message || data?.error || "Could not send reset email.");
       return;
     }
-
-    toast({
-      title: "Check your inbox",
-      description: `We sent a reset link to ${targetEmail}.`,
-    });
+    toast({ title: "Check your inbox", description: `We sent a reset link to ${targetEmail}.` });
     setResetOpen(false);
   };
 
-  // Set new password after user returns from the email link
-  const submitNewPassword = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPass || newPass.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    if (newPass !== newPass2) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    setSettingNew(true);
+    setLoading(true);
     setError(null);
-
-    const { data, error } = await supabase.auth.updateUser({ password: newPass });
-
-    setSettingNew(false);
+    const { error } = await signUp(email, password, fullName);
+    setLoading(false);
 
     if (error) {
-      setError(error.message || "Could not update password.");
+      setError(error.message);
       return;
     }
+    toast({ title: "Account created!", description: "Check your email to confirm your account." });
+    navigate("/dashboard");
+  };
 
-    toast({
-      title: "Password updated",
-      description: "You can now sign in with your new password.",
-    });
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const { error } = await signIn(email, password);
+    setLoading(false);
 
-    setShowSetNew(false);
-    // If a recovery session is active, navigate to dashboard; otherwise go to signin tab
-    navigate("/auth");
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    toast({ title: "Welcome back!", description: "Signed in successfully." });
+    navigate("/dashboard");
   };
 
   return (
@@ -166,6 +99,10 @@ const AuthPage = () => {
         <div className="text-center">
           <h1 className="font-display text-4xl font-bold text-foreground mb-2">Welcome to Looped</h1>
           <p className="text-muted-foreground text-lg">Your journey to daily 1% improvements starts here</p>
+          <div className="text-sm text-primary mt-2 flex items-center justify-center gap-1">
+            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+            <span>Mobile app with free features coming soon!</span>
+          </div>
         </div>
 
         <Card className="card-gradient">
@@ -293,10 +230,7 @@ const AuthPage = () => {
                   <div className="text-center text-sm">
                     <button
                       type="button"
-                      onClick={() => {
-                        setResetEmail(email);
-                        setResetOpen(true);
-                      }}
+                      onClick={() => setResetOpen(true)}
                       className="text-primary hover:underline"
                       disabled={loading}
                     >
@@ -316,15 +250,14 @@ const AuthPage = () => {
         </div>
       </div>
 
-      {/* Send Reset Email Dialog */}
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Reset your password</DialogTitle>
-            <DialogDescription>We’ll email you a secure link to set a new password.</DialogDescription>
+            <DialogDescription>We'll email you a secure link to set a new password.</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={sendReset} className="space-y-3">
+          <div className="space-y-3">
             <Label htmlFor="reset-email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -335,61 +268,13 @@ const AuthPage = () => {
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 className="pl-10"
-                required
               />
             </div>
-            <Button type="submit" className="w-full btn-hero" disabled={resetting}>
-              {resetting ? "Sending..." : "Send reset link"}
+            <Button onClick={sendReset} className="w-full btn-hero" disabled={loading}>
+              {loading ? "Sending..." : "Send reset link"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Set New Password Dialog (lands here from email link: /auth?mode=reset) */}
-      <Dialog open={showSetNew} onOpenChange={setShowSetNew}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Set a new password</DialogTitle>
-            <DialogDescription>Enter your new password below.</DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={submitNewPassword} className="space-y-3">
-            <Label htmlFor="new-pass">New password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="new-pass"
-                type="password"
-                placeholder="••••••••"
-                value={newPass}
-                onChange={(e) => setNewPass(e.target.value)}
-                className="pl-10"
-                minLength={6}
-                required
-              />
-            </div>
-
-            <Label htmlFor="new-pass2">Confirm new password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="new-pass2"
-                type="password"
-                placeholder="••••••••"
-                value={newPass2}
-                onChange={(e) => setNewPass2(e.target.value)}
-                className="pl-10"
-                minLength={6}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full btn-hero" disabled={settingNew}>
-              {settingNew ? "Updating..." : "Update password"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
