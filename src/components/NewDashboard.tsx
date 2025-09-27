@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flame, Calendar, Clock, Share2, StickyNote, TrendingUp, Zap, Award, Settings, Plus, Shuffle, Pause, User, Trophy, Target, Play, History, BarChart3 } from "lucide-react";
+import { Flame, Calendar, Clock, Share2, StickyNote, TrendingUp, Zap, Award, Settings, Plus, Shuffle, Pause, User, Trophy, Target, Play, History, BarChart3, MessageSquare, MoreHorizontal, Trash2, Sparkles } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,8 @@ import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import InProgressChallenges from "./InProgressChallenges";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { format } from "date-fns";
 
 const NewDashboard = () => {
   const { user } = useAuth();
@@ -43,6 +45,10 @@ const NewDashboard = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showDoItNowModal, setShowDoItNowModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
 
   // Fetch user streak data
@@ -214,16 +220,16 @@ const NewDashboard = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      energy: 'bg-success',
-      mindset: 'bg-accent',
-      focus: 'bg-secondary',
-      relationships: 'bg-primary',
-      home: 'bg-success',
-      finance: 'bg-secondary',
-      creativity: 'bg-accent',
-      recovery: 'bg-primary',
+      energy: 'bg-success text-success-foreground',
+      mindset: 'bg-accent text-accent-foreground',
+      focus: 'bg-secondary text-secondary-foreground',
+      relationships: 'bg-primary text-primary-foreground',
+      home: 'bg-success text-success-foreground',
+      finance: 'bg-secondary text-secondary-foreground',
+      creativity: 'bg-accent text-accent-foreground',
+      recovery: 'bg-primary text-primary-foreground',
     };
-    return colors[category as keyof typeof colors] || 'bg-muted';
+    return colors[category as keyof typeof colors] || 'bg-muted text-muted-foreground';
   };
 
   const getGreeting = () => {
@@ -245,7 +251,7 @@ const NewDashboard = () => {
               {getGreeting()}, {user?.email?.split('@')[0] || 'friend'}
             </h1>
             <p className="text-muted-foreground text-lg">
-              Day {currentDay} • {streak.current_streak} day streak
+              {format(new Date(), 'EEEE, MMMM do')} • Day {currentDay} • {streak.current_streak} day streak
             </p>
           </div>
 
@@ -263,16 +269,29 @@ const NewDashboard = () => {
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          <span>{todayChallenge.estimated_time}m</span>
+                          <span>{todayChallenge.estimated_minutes}m</span>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(todayChallenge.category)}`}>
                           {todayChallenge.category}
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setShowDeleteDialog(true)}>
-                      <span className="text-xs text-muted-foreground">Skip</span>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="rounded-full">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={() => setShowDeleteDialog(true)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   
                   <h3 className="text-2xl font-display font-bold text-foreground mb-4">
@@ -284,7 +303,7 @@ const NewDashboard = () => {
                   
                   <div className="flex gap-4">
                     <Button 
-                      onClick={() => setShowActionModal(true)}
+                      onClick={() => setShowDoItNowModal(true)}
                       size="lg"
                       className="flex-1 bg-gradient-warm hover:shadow-warm transition-all duration-500 rounded-xl text-lg py-6"
                     >
@@ -292,137 +311,34 @@ const NewDashboard = () => {
                     </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => setFeedback('just_right')}
+                      onClick={() => setShowFeedbackModal(true)}
                       size="lg"
                       className="rounded-xl border-2"
                     >
-                      ✓
+                      <MessageSquare className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="bg-muted/30 rounded-3xl p-12 text-center border border-dashed border-border">
                   <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Plus className="w-10 h-10 text-primary" />
+                    <Sparkles className="w-10 h-10 text-primary" />
                   </div>
                   <h3 className="text-2xl font-display font-bold text-foreground mb-3">All done for today</h3>
                   <p className="text-muted-foreground mb-6 text-lg">You've completed today's focus. Great work!</p>
-                  <CreateChallengeModal>
-                    <Button className="bg-gradient-warm rounded-xl px-8">
-                      Create Something New
-                    </Button>
-                  </CreateChallengeModal>
+                  <Button 
+                    onClick={() => setShowCreateModal(true)}
+                    className="bg-gradient-warm rounded-xl px-8"
+                  >
+                    Create Something New
+                  </Button>
                 </div>
               )}
-                <CardContent>
-                  {todayChallenge.benefit && (
-                      <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="w-2 h-2 bg-success rounded-full"></span>
-                        </div>
-                        <p className="text-sm font-medium">
-                          <span className="text-success">Why this works:</span> {todayChallenge.benefit}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {todayChallenge.status === 'completed' ? (
-                    <div className="text-center py-8 space-y-4">
-                      <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto">
-                        <Trophy className="h-8 w-8 text-success" />
-                      </div>
-                      <h4 className="text-xl font-semibold text-success">Challenge Complete!</h4>
-                      <p className="text-muted-foreground">
-                        Excellent work! Your coach is preparing tomorrow's challenge.
-                      </p>
-                      <div className="flex justify-center space-x-2 mt-4">
-                        <AddNoteModal>
-                          <Button variant="outline" size="sm">Add Note</Button>
-                        </AddNoteModal>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => setShowShareCard(true)}
-                        >
-                          Share Win
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Button 
-                        onClick={() => setShowActionModal(true)}
-                        className="btn-hero w-full text-lg py-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                      >
-                        <Play className="h-5 w-5 mr-2" />
-                        Do It Now
-                      </Button>
-                      
-                      <div className="flex justify-center space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setShowDeleteDialog(true)}
-                        >
-                          Can't do this?
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-2 mt-4">
-                        <Button 
-                          variant={feedback === 'too_easy' ? 'default' : 'ghost'} 
-                          size="sm"
-                          onClick={() => setFeedback('too_easy')}
-                          className="text-xs"
-                        >
-                          Too Easy
-                        </Button>
-                        <Button 
-                          variant={feedback === 'just_right' ? 'default' : 'ghost'} 
-                          size="sm"
-                          onClick={() => setFeedback('just_right')}
-                          className="text-xs"
-                        >
-                          Just Right
-                        </Button>
-                        <Button 
-                          variant={feedback === 'too_hard' ? 'default' : 'ghost'} 
-                          size="sm"
-                          onClick={() => setFeedback('too_hard')}
-                          className="text-xs"
-                        >
-                          Too Hard
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="card-feature border-2 border-dashed border-muted-foreground/30">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No Challenges Yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Create your first custom challenge to get started on your 1% improvement journey.
-                  </p>
-                  <CreateChallengeModal>
-                    <Button className="btn-hero">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Challenge
-                    </Button>
-                  </CreateChallengeModal>
-                </CardContent>
-              </Card>
             </div>
             
             {/* Quick Stats Sidebar */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-card rounded-2xl p-6 border border-border/50">
+              <div className="bg-card rounded-2xl p-6 border border-border/50 shadow-organic">
                 <h3 className="font-display text-lg font-bold text-foreground mb-4">
                   Your Journey
                 </h3>
@@ -446,182 +362,61 @@ const NewDashboard = () => {
                   </Button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-                  <History className="h-8 w-8 text-success mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">See History</h3>
-                  <p className="text-xs text-muted-foreground">Track your journey</p>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Momentum Bar + Progress */}
-            <Card className="card-feature">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Your Momentum</h3>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-success">{streak.current_streak}</div>
-                    <div className="text-xs text-muted-foreground">day streak</div>
-                  </div>
-                </div>
+              {/* Quick Actions */}
+              <div className="space-y-4">
+                <Button 
+                  variant="outline"
+                  className="w-full justify-start rounded-xl h-12"
+                  onClick={() => setShowShareModal(true)}
+                >
+                  <Share2 className="w-4 h-4 mr-3" />
+                  Share Progress
+                </Button>
                 
-                {/* Momentum Bar */}
-                <div className="w-full bg-muted/30 rounded-full h-3 mb-4">
-                  <div 
-                    className="bg-gradient-to-r from-success to-primary h-3 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${Math.min((streak.current_streak / 21) * 100, 100)}%` }}
-                  ></div>
-                </div>
-                <div className="text-sm text-muted-foreground text-center">
-                  {streak.current_streak < 21 
-                    ? `${21 - streak.current_streak} days to your next milestone`
-                    : "Incredible consistency!"
-                  }
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}  
-          <div className="lg:col-span-1 space-y-6">
-            {/* In Progress Challenges */}
-            <InProgressChallenges />
-            
-            {/* Quick Stats */}
-            <Card className="card-soft">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Quick Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Completed</span>
-                  <span className="font-medium">{totalChallenges.data || 0}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Success Rate</span>
-                  <span className="font-medium">{completionRate.data || 0}%</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Best Streak</span>
-                  <span className="font-medium">{streak.longest_streak}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Create Challenge */}
-            <CreateChallengeModal>
-              <Card className="card-soft hover:shadow-soft transition-all duration-200 cursor-pointer">
-                <CardContent className="p-4 text-center">
-                  <Plus className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Create Challenge</h3>
-                  <p className="text-xs text-muted-foreground">Add your own task</p>
-                </CardContent>
-              </Card>
-            </CreateChallengeModal>
-            
-            {/* Navigation */}
-            <Card className="card-soft">
-              <CardContent className="p-2">
-                <div className="space-y-1">
+                <AddNoteModal>
                   <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={() => navigate('/insights')}
+                    variant="outline"
+                    className="w-full justify-start rounded-xl h-12"
                   >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Insights
+                    <StickyNote className="w-4 h-4 mr-3" />
+                    Add Note
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={() => navigate('/history')}
-                  >
-                    <History className="h-4 w-4 mr-2" />
-                    History
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={() => navigate('/settings')}
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </AddNoteModal>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full justify-start rounded-xl h-12"
+                  onClick={() => navigate('/history')}
+                >
+                  <History className="w-4 h-4 mr-3" />
+                  View History
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Coach Sidebar */}
-      <CoachSidebar 
-        isOpen={isCoachOpen}
-        onToggle={() => setIsCoachOpen(!isCoachOpen)}
-      />
 
       {/* Modals */}
-      <DoItNowModal
-        open={showActionModal}
-        onOpenChange={setShowActionModal}
-        challenge={todayChallenge ? {
-          ...todayChallenge,
-          difficulty: typeof todayChallenge.difficulty === 'string' ? 
-            parseInt(todayChallenge.difficulty) || 3 : 
-            todayChallenge.difficulty
-        } : {
-          id: '',
-          title: 'Create a Challenge',
-          description: 'Add a custom challenge to get started',
-          category: 'mindset',
-          difficulty: 3,
-          estimated_minutes: 15,
-        }}
-        timeSelected={15}
-        onComplete={handleCompleteChallenge}
-      />
-
-      {/* Delete Challenge Confirmation */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Challenge?</AlertDialogTitle>
+            <AlertDialogTitle>Remove Challenge?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this challenge? This action cannot be undone.
+              This will remove the challenge from your queue. You can always create a new one later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Challenge</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteChallenge}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete Challenge
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteChallenge}>
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Share Card Dialog */}
-      <Dialog open={showShareCard} onOpenChange={setShowShareCard}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Share Your Progress</DialogTitle>
-          </DialogHeader>
-          <ShareCardGenerator
-            type="daily"
-            challengeTitle={todayChallenge?.title}
-            category={todayChallenge?.category}
-            onClose={() => setShowShareCard(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <CoachSidebar isOpen={isCoachOpen} onToggle={() => setIsCoachOpen(!isCoachOpen)} />
     </div>
   );
 };
