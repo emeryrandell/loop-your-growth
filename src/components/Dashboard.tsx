@@ -9,13 +9,6 @@ const Dashboard = () => {
   const [streak, setStreak] = useState(7);
   const [todayCompleted, setTodayCompleted] = useState(false);
 
-  const todayChallenge = {
-    title: "Active Recall Session",
-    description: "Spend 15 minutes quizzing yourself on key material. Test your knowledge without looking at notes first.",
-    difficulty: "beginner",
-    category: "Study"
-  };
-
   const handleCompleteChallenge = () => {
     setTodayCompleted(true);
     setStreak(prev => prev + 1);
