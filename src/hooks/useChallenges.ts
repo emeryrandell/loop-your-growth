@@ -11,18 +11,19 @@ export interface Challenge {
   title: string;
   description: string;
   benefit?: string;
-  difficulty: string;
+  difficulty: string;            // keep as string if your DB has text
   estimated_minutes: number;
 }
 
 export interface UserChallenge {
   id: string;
   user_id: string;
+
   // legacy relation-based
   challenge_id?: string | null;
   challenge?: Challenge | null;
 
-  // NEW: custom/template/trainer fields
+  // custom/template/trainer fields
   is_custom?: boolean;
   created_by?: "trainer" | "template" | "user" | string;
 
@@ -102,7 +103,7 @@ export function useChallenges() {
         .eq("user_id", user.id)
         .single();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error && (error as any).code !== "PGRST116") throw error;
       return data || { current_streak: 0, longest_streak: 0 };
     },
     enabled: !!user,
@@ -118,7 +119,7 @@ export function useChallenges() {
         .select("*")
         .eq("user_id", user.id)
         .single();
-      if (error && error.code !== "PGRST116") throw error;
+      if (error && (error as any).code !== "PGRST116") throw error;
       return data;
     },
     enabled: !!user,
@@ -126,7 +127,7 @@ export function useChallenges() {
 
   /**
    * TODAY/PENDING: no more auto-creating random challenges.
-   * We just fetch the most recent pending/active user_challenges (custom or linked).
+   * Just fetch the most recent pending/active user_challenges (custom or linked).
    */
   const {
     data: todayChallenge,
@@ -136,6 +137,7 @@ export function useChallenges() {
     queryKey: ["today-challenge", user?.id],
     queryFn: async () => {
       if (!user) return null;
+
       const { data, error } = await supabase
         .from("user_challenges")
         .select(`*, challenges(*)`)
@@ -145,15 +147,13 @@ export function useChallenges() {
         .limit(1)
         .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error && (error as any).code !== "PGRST116") throw error;
       return data || null;
     },
     enabled: !!user,
   });
 
-  if (todayErr) {
-    console.error("today-challenge error:", todayErr);
-  }
+  if (todayErr) console.error("today-challenge error:", todayErr);
 
   /** History list (shows both custom and linked) */
   const { data: challengeHistory = [] } = useQuery({
@@ -187,16 +187,11 @@ export function useChallenges() {
       body: { action: "general", message, payload },
     });
 
-    if (error) {
-      throw new Error(error.message || "Coach error");
-    }
+    if (error) throw new Error(error.message || "Coach error");
 
-    // If the coach returned human text, fine; if it created a challenge,
-    // the server already inserted. We just refresh the queries.
-    await refetchAll();
+    await refetchAll(); // new row shows up immediately
 
-    // Return the raw response in case the UI wants to show it.
-    return data?.response as string | undefined;
+    return data?.response as string | undefined; // trainer text (if any)
   };
 
   /** Complete challenge */
@@ -233,7 +228,7 @@ export function useChallenges() {
         .eq("user_id", user.id)
         .single();
 
-      if (streakError && streakError.code !== "PGRST116") throw streakError;
+      if (streakError && (streakError as any).code !== "PGRST116") throw streakError;
 
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -244,14 +239,9 @@ export function useChallenges() {
 
       if (existingStreak) {
         const lastDate = existingStreak.last_completion_date;
-        if (lastDate === yesterdayStr) {
-          newStreak = existingStreak.current_streak + 1;
-        } else if (lastDate === today) {
-          // Already completed today — no change
-          return;
-        } else {
-          newStreak = 1;
-        }
+        if (lastDate === yesterdayStr) newStreak = existingStreak.current_streak + 1;
+        else if (lastDate === today) return; // already counted today
+        else newStreak = 1;
 
         newLongestStreak = Math.max(newStreak, existingStreak.longest_streak);
 
@@ -261,8 +251,7 @@ export function useChallenges() {
             current_streak: newStreak,
             longest_streak: newLongestStreak,
             last_completion_date: today,
-            streak_start_date:
-              newStreak === 1 ? today : existingStreak.streak_start_date,
+            streak_start_date: newStreak === 1 ? today : existingStreak.streak_start_date,
           })
           .eq("user_id", user.id);
 
@@ -279,10 +268,7 @@ export function useChallenges() {
       }
     },
     onSuccess: async () => {
-      toast({
-        title: "Challenge Completed!",
-        description: "Great job! Your streak has been updated.",
-      });
+      toast({ title: "Challenge Completed!", description: "Great job! Your streak has been updated." });
       await refetchAll();
     },
     onError: (error) => {
@@ -309,10 +295,7 @@ export function useChallenges() {
       if (error) throw error;
     },
     onSuccess: async () => {
-      toast({
-        title: "Challenge Snoozed",
-        description: "No worries! Try again tomorrow.",
-      });
+      toast({ title: "Challenge Snoozed", description: "No worries! Try again tomorrow." });
       await refetchAll();
     },
   });
