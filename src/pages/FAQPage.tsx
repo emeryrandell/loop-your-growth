@@ -30,7 +30,7 @@ const FAQPage = () => {
         },
         {
           question: "How do I get started?",
-          answer: "Simply sign up for our free demo to try your first challenge. No credit card required! After experiencing the platform, you can upgrade to Premium for full access to all features including streak tracking, progress cards, and unlimited challenges."
+          answer: "As of right now, we apologise as our free demo is not working. Please go our social media @getlooped.app on Instagram or @getloopedapp on Youtube to leanr more our product before purchasing a subscription."
         },
         {
           question: "What are the 8 challenge categories?",
@@ -51,7 +51,7 @@ const FAQPage = () => {
         },
         {
           question: "Can I switch between tracks?",
-          answer: "Absolutely! Premium users can change their primary track anytime in settings. Your personal coach will adapt to provide challenges for your new focus area while maintaining your overall progress history."
+          answer: "Absolutely! Premium users can change their primary tracks anytime in settings. Your personal coach will adapt to provide challenges for your new focus area while maintaining your overall progress history."
         }
       ]
     },
@@ -60,11 +60,11 @@ const FAQPage = () => {
       faqs: [
         {
           question: "What's included in the free demo?",
-          answer: "The free demo includes one day of challenges, basic progress tracking, limited coaching interaction, and community access. It's designed to give you a real taste of the Looped experience."
+          answer: "The free demo includes one day of challenges, basic progress tracking, limited coaching interaction, and community access. It's designed to give you a real taste of the Looped experience. (As of right the demo is not working and will be back within the next week.)"
         },
         {
           question: "What additional features do I get with Premium?",
-          answer: "Premium includes unlimited daily challenges, full personal coaching, streak tracking with badges, shareable progress cards, complete challenge history, weekly insights, priority support, and early access to new features."
+          answer: "Premium includes unlimited daily challenges, full personal coaching, streak tracking with badges, shareable progress cards, complete challenge history, weekly insights, priority support, and early access to new features. As of right now we do not have a free option."
         },
         {
           question: "How do progress cards work?",
@@ -81,7 +81,7 @@ const FAQPage = () => {
         },
         {
           question: "What's the difference between monthly and yearly plans?",
-          answer: "The yearly plan offers 37% savings (equivalent to 2 months free) plus exclusive features like quarterly coaching sessions, advanced analytics, goal-setting workshops, and custom habit creation tools."
+          answer: "The yearly plan offers 17% savings plus new exclusive feature that are coming soon!"
         },
         {
           question: "Do you offer refunds?",
@@ -102,7 +102,7 @@ const FAQPage = () => {
         },
         {
           question: "How do I contact support?",
-          answer: "You can reach us at contactloopedpro@gmail.com for any questions or support. Response times may vary, but we do our best to help everyone on their growth journey!"
+          answer: "You can reach us at getloopedsocialmedia@gmail.com for any questions or support. Response times may vary, but we do our best to help everyone on their growth journey!"
         }
       ]
     }
