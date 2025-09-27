@@ -19,6 +19,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 function CoachFab() {
   const { toast } = useToast();
@@ -387,29 +389,31 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/progress" element={<ProgressPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+  {/* push content below header and add consistent page gutters */}
+  <div className="min-h-screen bg-background pt-header">
+    <main className="site-container py-6 md:py-8">
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/insights" element={<InsightsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </main>
+
+    {/* shows on every page */}
+    <CoachFab />
+  </div>
+</BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
-
-<>
-  {/* your existing layout/routes */}
-  <CoachFab />
-</>
 
 export default App;
