@@ -58,10 +58,9 @@ const Dashboard = () => {
                   <div>
                     <CardTitle className="text-2xl font-semibold">Today's Challenge</CardTitle>
                     <div className="flex items-center mt-2 space-x-2">
-                      <Badge variant="outline">Study</Badge>
-                      <Badge variant="secondary">
-                        Beginner
-                      </Badge>
+                     <Badge variant="outline">{todayChallenge.category}</Badge>
+                      <Badge variant={todayChallenge.difficulty === 'beginner' ? 'secondary' : 'default'}>
+                        {todayChallenge.difficulty}
                     </div>
                   </div>
                   <Target className="h-6 w-6 text-primary" />
@@ -69,8 +68,8 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <h3 className="text-xl font-medium mb-3">Complete 25-minute Focused Study Session</h3>
-                <p className="text-muted-foreground mb-6">Use the Pomodoro technique to complete a focused study session on your chosen topic. No distractions allowed!</p>
-                
+                <h3 className="text-xl font-medium mb-3">{todayChallenge.title}</h3>
+                <p className="text-muted-foreground mb-6">{todayChallenge.description}</p>
                 {!todayCompleted ? (
                   <div className="space-y-4">
                     <Button 
