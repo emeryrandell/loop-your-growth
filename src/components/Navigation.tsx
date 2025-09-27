@@ -20,18 +20,13 @@ const Navigation = ({ isAuthenticated = false, userName }: NavigationProps) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-gradient-warm rounded-2xl flex items-center justify-center shadow-warm group-hover:shadow-lg transition-all duration-300">
-                <span className="text-accent-foreground font-bold text-lg">D</span>
-              </div>
-              <span className="font-display font-bold text-2xl text-foreground">Daily Challenges</span>
-            </Link>
-          </div>
+          <Link to="/" className="flex items-center">
+            <span className="font-display text-xl font-bold text-foreground">Looped</span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">

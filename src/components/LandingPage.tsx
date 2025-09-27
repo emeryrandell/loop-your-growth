@@ -53,92 +53,46 @@ const LandingPage = () => {
       </section>
 
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero"></div>
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-24 h-24 bg-accent/10 rounded-full blur-lg animate-pulse" style={{animationDelay: '1s'}}></div>
-        
-        <div className="max-w-5xl mx-auto text-center relative z-10 space-y-8">
-          <div className="space-y-6">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-foreground leading-[1.1] tracking-tight">
-              Your life is about to get{' '}
-              <span className="relative">
-                <span className="bg-gradient-warm bg-clip-text text-transparent">
-                  intentional
-                </span>
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-warm rounded-full transform scale-x-0 animate-[scale-x_1s_ease-out_0.5s_forwards] origin-left"></div>
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium">
-              Small daily actions compound into extraordinary transformations. Start where you are, use what you have, do what you can.
-            </p>
-          </div>
-
-          <div className="pt-8">
-            <Button 
-              size="lg" 
-              className="text-lg px-12 py-6 h-auto bg-gradient-warm hover:shadow-warm transition-all duration-500 transform hover:scale-105 rounded-xl font-semibold"
-              onClick={() => window.location.href = '/auth'}
-            >
-              Begin Your Transformation
+      <section className="relative py-20 md:py-32 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/20 to-background" />
+        <div className="relative max-w-6xl mx-auto text-center">
+          <h1 className="font-display text-5xl md:text-7xl font-bold text-foreground mb-6 animate-fade-in-up">
+            1% Better, Every Day.
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-fade-in-up [animation-delay:0.2s]">
+            Your personalized trainer learns from you and gives you one challenge each day to build momentum.
+          </p>
+          <Link to="/auth">
+            <Button size="lg" className="btn-hero text-lg px-8 py-6 animate-fade-in-up [animation-delay:0.4s]">
+              Get Started Now
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          </div>
-
-          <div className="pt-12 flex items-center justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-success rounded-full"></div>
-              <span>Start free</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-success rounded-full"></div>
-              <span>No commitment</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-success rounded-full"></div>
-              <span>Proven results</span>
-            </div>
-          </div>
+          </Link>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 leading-tight">
-              Designed for{' '}
-              <span className="bg-gradient-warm bg-clip-text text-transparent">
-                real people
-              </span>
+      <section className="py-20 px-4 bg-secondary/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">
+              Simple. Personal. Effective.
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              No overwhelming dashboards or complex systems. Just simple, effective tools that actually help you grow.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Three core features that make lasting change inevitable.
             </p>
           </div>
-          
-          <div className="grid gap-8 md:gap-12">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className={`flex flex-col ${index % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 py-8`}
-              >
-                <div className="flex-1 space-y-6">
-                  <div className="w-14 h-14 bg-gradient-warm rounded-2xl flex items-center justify-center shadow-warm">
-                    <feature.icon className="w-7 h-7 text-accent-foreground" />
+              <Card key={index} className="card-feature">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary-glow rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <feature.icon className="h-8 w-8 text-primary-foreground" />
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
-                    {feature.description}
-                  </p>
-                </div>
-                <div className="flex-1 h-64 bg-gradient-soft rounded-3xl shadow-organic flex items-center justify-center">
-                  <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center">
-                    <feature.icon className="w-16 h-16 text-primary" />
-                  </div>
-                </div>
-              </div>
+                  <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
