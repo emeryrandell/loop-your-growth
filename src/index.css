@@ -3,8 +3,7 @@
 @tailwind utilities;
 
 /* Looped Design System - Modern, minimal self-improvement platform
-All colors MUST be HSL for proper theming.
-*/
+   All colors MUST be HSL for proper theming. */
 
 @layer base {
   :root {
@@ -29,43 +28,37 @@ All colors MUST be HSL for proper theming.
     --border: 220 15% 90%;
     --input: 220 15% 90%;
     --ring: 220 100% 15%;
-    
+
     --success: 142 76% 36%;
     --success-foreground: 355 100% 97%;
     --success-glow: 142 100% 85%;
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
     --radius: 0.5rem;
-    
-    /* Gradients - Warm, motivational gradients */
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(14 85% 55%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(45 20% 98%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-glow)));
-    
-    /* Shadows - Elegant depth */
+
+    /* Shadows */
     --shadow-soft: 0 2px 20px -5px hsl(var(--foreground) / 0.1);
     --shadow-glow: 0 0 30px hsl(var(--primary) / 0.2);
     --shadow-success: 0 0 25px hsl(var(--success) / 0.3);
-    
+
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
+    /* Sidebar tokens (shadcn compat) */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -104,9 +97,7 @@ All colors MUST be HSL for proper theming.
     --sidebar-border: 220 20% 20%;
     --sidebar-ring: 220 60% 25%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -115,59 +106,59 @@ All colors MUST be HSL for proper theming.
     @apply bg-background text-foreground font-sans;
   }
 
-  /* Typography - Looped Brand Fonts (System Fallbacks) */
+  /* Typography */
   .font-display {
-    font-family: ui-serif, 'Times New Roman', 'Georgia', serif;
+    font-family: ui-serif, "Times New Roman", Georgia, serif;
     font-variation-settings: "opsz" auto;
   }
-  
+
   .font-sans {
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    font-feature-settings: "tnum" on; /* Tabular numbers for consistent widths */
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      system-ui, sans-serif;
+    font-feature-settings: "tnum" on;
   }
 }
 
 @layer components {
-  /* Button Variants */
+  /* Buttons */
   .btn-hero {
-    @apply bg-gradient-to-r from-primary to-primary-glow text-primary-foreground 
-           shadow-lg hover:scale-105 
-           transition-all duration-300 font-medium;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  }
-  
-  .btn-hero:hover {
-    box-shadow: 0 0 30px hsl(var(--primary) / 0.2);
-  }
-  
-  .btn-ghost-warm {
-    @apply bg-secondary/50 text-secondary-foreground border border-border
-           hover:bg-secondary 
-           transition-all duration-200;
+    @apply bg-gradient-to-r from-primary to-primary-glow text-primary-foreground
+           shadow-lg transition-all duration-300 font-medium;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
 
-  /* Card Styles - Looped Soft & Airy */
+  .btn-hero:hover {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost-warm {
+    @apply bg-secondary/50 text-secondary-foreground border border-border
+           hover:bg-secondary transition-all duration-200;
+  }
+
+  /* Cards */
   .card-soft {
     @apply bg-card border border-border rounded-2xl;
     box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
   }
-  
+
   .card-feature {
-    @apply bg-card border border-border/50 hover:border-primary/30 rounded-2xl
-           transition-all duration-200 ease-out;
+    @apply bg-card border border-border/50 rounded-2xl transition-all duration-200 ease-out;
   }
-  
+
   .card-feature:hover {
     box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
   }
 
-  /* Progress & Streak Styles */
+  /* Progress & streak */
   .streak-glow {
     @apply text-success font-bold text-4xl md:text-6xl;
     text-shadow: 0 0 20px hsl(var(--success) / 0.3);
   }
-  
+
   .progress-card {
     background: var(--gradient-success);
     @apply text-success-foreground p-6 rounded-2xl;
@@ -178,37 +169,27 @@ All colors MUST be HSL for proper theming.
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
-  
+
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite alternate;
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
-  
+
   @keyframes pulse-glow {
-    0% { box-shadow: 0 0 20px hsl(var(--primary) / 0.2); }
-    100% { box-shadow: 0 0 30px hsl(var(--primary) / 0.4); }
-  }
-  @layer utilities {
-  /* page container so content isn’t glued to the edges */
-  .site-container { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
-
-  /* top padding so content never hides under a sticky/fixed header */
-  .pt-header { padding-top: var(--header-h, 64px); }
-}
-
-@layer components {
-  /* optional class for your header wrapper */
-  .sticky-header {
-    position: sticky;
-    top: 0;
-    height: var(--header-h, 64px);
-    z-index: 60;
-    backdrop-filter: saturate(180%) blur(8px);
-    background: hsl(var(--background) / 0.85);
-    border-bottom: 1px solid hsl(var(--border));
+    0% {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
+    }
+    100% {
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.4);
+    }
   }
 }
