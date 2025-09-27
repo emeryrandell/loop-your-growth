@@ -1,4 +1,4 @@
-// supabase/functions/ai-trainer/index.ts
+// ai-trainer/index.ts
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
@@ -8,7 +8,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Action = "greeting" | "feedback" | "create_challenge" | "schedule_challenge" | "general" | "send_password_reset";
+type Action =
+  | "greeting"
+  | "feedback"
+  | "create_challenge"
+  | "schedule_challenge"
+  | "general"
+  | "send_password_reset"; // ← added
 
 const ALLOWED_CATEGORIES = [
   "energy",
@@ -78,8 +84,6 @@ type ParsedIntent = {
 
 function parseIntent(raw: string): ParsedIntent {
   const text = (raw || "").toLowerCase();
-
-  // Detect creation intent
   const createTriggers = [
     "new challenge", "create challenge", "make a challenge", "give me a challenge",
     "task for", "give me a", "plan a task", "challenge me", "start a challenge",
@@ -87,7 +91,6 @@ function parseIntent(raw: string): ParsedIntent {
   const shouldCreate = createTriggers.some((t) => text.includes(t)) ||
     /(^|\s)(challenge|task)(\s|$)/.test(text);
 
-  // Extract duration
   let minutes: number | null = null;
   const hrMatch = text.match(/(\d+)\s*(h|hr|hrs|hour|hours)\b/);
   const minMatch = text.match(/(\d+)\s*(m|min|mins|minute|minutes)\b/);
@@ -96,7 +99,6 @@ function parseIntent(raw: string): ParsedIntent {
   if (hrMatch) minutes = Number(hrMatch[1]) * 60;
   if (minMatch) minutes = Number(minMatch[1]);
   if (!minutes && bareMinMatch) minutes = Number(bareMinMatch[1]);
-
   if (!minutes) {
     const solo = text.match(/\b(\d{1,3})\b/);
     if (solo && shouldCreate) {
@@ -106,23 +108,14 @@ function parseIntent(raw: string): ParsedIntent {
   }
   minutes = minutesOrNull(minutes);
 
-  // Extract category via synonyms
   const catMap: Record<string, typeof ALLOWED_CATEGORIES[number]> = {
-    // energy
     exercise: "energy", workout: "energy", run: "energy", walk: "energy", movement: "energy", fitness: "energy",
-    // mindset
     mindset: "mindset", meditate: "mindset", gratitude: "mindset", journal: "mindset", reframing: "mindset",
-    // focus
     focus: "focus", work: "focus", study: "focus", productivity: "focus", deepwork: "focus",
-    // relationships
     relationships: "relationships", social: "relationships", friend: "relationships", family: "relationships", connect: "relationships",
-    // home
     home: "home", environment: "home", declutter: "home", clean: "home", organize: "home",
-    // finance
     finance: "finance", money: "finance", budget: "finance", spend: "finance", save: "finance",
-    // creativity
     creativity: "creativity", create: "creativity", art: "creativity", draw: "creativity", write: "creativity", music: "creativity",
-    // recovery
     recovery: "recovery", sleep: "recovery", rest: "recovery", wind: "recovery", winddown: "recovery",
   };
 
@@ -137,10 +130,7 @@ function parseIntent(raw: string): ParsedIntent {
   return { shouldCreate, category: detected, minutes };
 }
 
-function buildCreatePrompt(
-  userMessage: string,
-  hints: { category: string | null; minutes: number | null; goal?: string | null }
-) {
+function buildCreatePrompt(userMessage: string, hints: { category: string | null; minutes: number | null; goal?: string | null }) {
   const catLine = hints.category ? `Category to use: ${hints.category}\n` : "";
   const timeLine =
     typeof hints.minutes === "number"
@@ -168,45 +158,15 @@ function fallbackChallenge(category: string | null, minutes: number | null) {
   };
 }
 
-// Custom password reset email via Resend
-async function sendCustomResetEmail({
-  supabaseAdmin,
-  email,
-  redirectTo,
-}: {
-  supabaseAdmin: any; // keep loose to avoid generics mismatch in edge runtime
-  email: string;
-  redirectTo: string;
-}) {
-  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-    type: "recovery",
-    email,
-    options: { redirectTo },
-  });
-  if (error) throw new Error(error.message);
-
-  const resetUrl =
-    (data as any)?.properties?.action_link ||
-    (data as any)?.action_link ||
-    redirectTo;
-
+async function sendEmailViaResend({
+  to,
+  subject,
+  html,
+}: { to: string; subject: string; html: string }) {
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ?? "Looped <no-reply@yourdomain.com>";
-
-  const html = `
-    <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
-      <h2>Reset your Looped password</h2>
-      <p>We received a request to reset your password.</p>
-      <p><a href="${resetUrl}" style="display:inline-block;padding:10px 16px;background:#0ea5e9;color:#fff;text-decoration:none;border-radius:8px;">Reset password</a></p>
-      <p>If you didn’t request this, you can ignore this email.</p>
-    </div>
-  `;
-
-  if (!RESEND_API_KEY) {
-    // dev fallback
-    console.log("RESET URL (dev):", resetUrl);
-    return { resetUrl };
-  }
+  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Looped <no-reply@example.com>";
+  if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
+  if (!FROM_EMAIL) throw new Error("Missing FROM_EMAIL");
 
   const resp = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -214,75 +174,85 @@ async function sendCustomResetEmail({
       Authorization: `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: email,
-      subject: "Reset your Looped password",
-      html,
-    }),
+    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
   });
 
   if (!resp.ok) {
-    const txt = await resp.text().catch(() => "");
-    throw new Error(`Resend failed: ${resp.status} ${txt}`);
+    const t = await resp.text().catch(() => "");
+    throw new Error(`Resend error ${resp.status}: ${t}`);
   }
-
-  return { resetUrl };
 }
 
 /* ---------------- main handler ---------------- */
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Parse body once
-    const body = await req.json().catch(() => ({} as any));
-    const action: Action = (body.action ?? "general") as Action;
-    const message: string = (body.message ?? "").toString();
-
-    // PUBLIC: send password reset (no auth required)
-    if (action === "send_password_reset") {
-      const email: string | undefined = body.email;
-      const redirectTo: string =
-        typeof body.redirectTo === "string" && body.redirectTo.trim()
-          ? body.redirectTo.trim()
-          : `${(Deno.env.get("PUBLIC_SITE_URL") ?? "https://yourapp.com").replace(/\/$/, "")}/auth?mode=reset`;
-
-      if (!email) {
-        return json({ success: false, error: "Missing email" }, 400);
-      }
-
-      const supabaseAdmin = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "" // admin
-      );
-
-      await sendCustomResetEmail({ supabaseAdmin, email, redirectTo });
-      return json({ ok: true });
-    }
-
-    // AUTH-REQUIRED below
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } }
     );
 
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    // Parse body first so we can allow password reset without auth
+    const body = await req.json().catch(() => ({} as any));
+    let action: Action = (body.action ?? "general") as Action;
+
+    /* ----- PUBLIC: send_password_reset (no auth required) ----- */
+    if (action === "send_password_reset") {
+      const email = (body.email ?? "").toString().trim();
+      const redirectTo =
+        (body.redirectTo ??
+          `${Deno.env.get("PUBLIC_SITE_URL") || ""}/auth?mode=reset`) as string;
+
+      if (!email) return json({ success: false, error: "Email required" }, 400);
+
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: { redirectTo },
+      });
+      if (error) return json({ success: false, error: error.message }, 400);
+
+      // IMPORTANT: link is at data.properties.action_link
+      const resetUrl = data?.properties?.action_link;
+      if (!resetUrl) return json({ success: false, error: "No reset URL from Supabase" }, 400);
+
+      const html = `
+        <div style="font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+          <h2 style="margin:0 0 8px">Reset your Looped password</h2>
+          <p style="margin:0 0 16px">We received a request to reset your password.</p>
+          <p style="margin:0 0 16px">
+            <a href="${resetUrl}" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#0f172a;color:#fff;text-decoration:none">
+              Set a new password
+            </a>
+          </p>
+          <p style="color:#6b7280">If you didn’t request this, you can safely ignore this email.</p>
+        </div>
+      `.trim();
+
+      await sendEmailViaResend({
+        to: email,
+        subject: "Reset your Looped password",
+        html,
+      });
+
+      return json({ success: true, message: "Reset email sent" });
+    }
+
+    /* ----- Everything below requires auth ----- */
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Unauthorized");
+    const token = authHeader.replace("Bearer ", "");
     const { data: authUser } = await supabase.auth.getUser(token);
     const user = authUser?.user;
-    if (!user) return json({ error: "Unauthorized" }, 401);
+    if (!user) throw new Error("Unauthorized");
 
-    const goal =
-      typeof body.goal === "string"
-        ? body.goal
-        : (body?.payload?.goal ?? null);
+    const message: string = (body.message ?? "").toString();
+    const goal = typeof body.goal === "string" ? body.goal : (body?.payload?.goal ?? null);
 
-    // Load context
+    // Load context (for smarter replies)
     const [settingsRes, memoryRes, recentMsgsRes, challengesCountRes] = await Promise.all([
       supabase.from("trainer_settings").select("*").eq("user_id", user.id).maybeSingle(),
       supabase.from("trainer_memory").select("*").eq("user_id", user.id),
@@ -298,33 +268,28 @@ serve(async (req) => {
     const recentMessages = (recentMsgsRes.data ?? []).reverse();
     const hasAnyChallenge = (challengesCountRes.count ?? 0) > 0;
 
-    // Brand-new user gentle nudge (no auto-random challenge)
-    if (!hasAnyChallenge && (!message || action === "greeting")) {
-      const welcome =
-        "Welcome—let’s start with a tiny win. Tell me the area (e.g., focus, energy, mindset) and your exact minutes (e.g., 17), and I’ll create a challenge.";
+    if (!hasAnyChallenge && (!message || action === "greeting") && action !== "create_challenge") {
+      const welcome = "Welcome—let’s start with a tiny win. Tell me the area (e.g., focus, energy, mindset) and your exact minutes (e.g., 17), and I’ll create a challenge.";
       await supabase.from("trainer_messages").insert({ user_id: user.id, message_type: "trainer", content: welcome });
       return json({ response: welcome, success: true });
     }
 
-    // Hints from payload
-    const hints = {
+    // Hints
+    let hints = {
       category: clampCategory(body.category ?? body?.payload?.category ?? null),
       minutes: minutesOrNull(body.time_minutes ?? body?.payload?.time_minutes ?? null),
       goal: goal || null,
     };
 
-    // Detect create intent if not explicitly set
-    let currentAction: Exclude<Action, "send_password_reset"> = (action as any) || "general";
-    if (currentAction !== "create_challenge") {
+    if (action !== "create_challenge") {
       const parsed = parseIntent(message);
       if (parsed.shouldCreate) {
-        currentAction = "create_challenge";
+        action = "create_challenge";
         if (!hints.category) hints.category = clampCategory(parsed.category);
         if (!hints.minutes) hints.minutes = parsed.minutes;
       }
     }
 
-    // Save user message
     if (message) {
       await supabase.from("trainer_messages").insert({ user_id: user.id, message_type: "user", content: message });
     }
@@ -344,7 +309,7 @@ serve(async (req) => {
       {
         role: "user",
         content:
-          currentAction === "create_challenge"
+          action === "create_challenge"
             ? buildCreatePrompt(message, hints)
             : (message || "Hello"),
       },
@@ -357,16 +322,13 @@ serve(async (req) => {
     const payload: Record<string, unknown> = {
       model: "gpt-4o-mini",
       messages: msgs,
-      temperature: currentAction === "create_challenge" ? 0.5 : 0.7,
-      max_tokens: currentAction === "create_challenge" ? 450 : 250,
+      temperature: action === "create_challenge" ? 0.5 : 0.7,
+      max_tokens: action === "create_challenge" ? 450 : 250,
       top_p: 0.9,
       frequency_penalty: 0.2,
       presence_penalty: 0.0,
     };
-    if (currentAction === "create_challenge") {
-      // Ask OpenAI for valid JSON object
-      (payload as any)["response_format"] = { type: "json_object" };
-    }
+    if (action === "create_challenge") payload["response_format"] = { type: "json_object" };
 
     const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -384,11 +346,9 @@ serve(async (req) => {
     const data = await resp.json();
     const content: string = data?.choices?.[0]?.message?.content ?? "";
 
-    // Save trainer reply (raw content)
     await supabase.from("trainer_messages").insert({ user_id: user.id, message_type: "trainer", content });
 
-    if (currentAction === "create_challenge") {
-      // Parse JSON or fallback
+    if (action === "create_challenge") {
       let challenge: any | null = null;
       try {
         challenge = JSON.parse(content);
@@ -396,23 +356,10 @@ serve(async (req) => {
         challenge = fallbackChallenge(hints.category, hints.minutes);
       }
 
-      // Normalize category & minutes
       const cat = clampCategory(challenge?.category) || hints.category || "mindset";
-      const mins = minutesOrNull(
-        typeof challenge?.estimated_minutes === "string"
-          ? Number(challenge.estimated_minutes)
-          : challenge?.estimated_minutes
-      ) || hints.minutes || 10;
+      const mins = minutesOrNull(challenge?.estimated_minutes) || hints.minutes || 10;
+      const difficulty = [1, 2, 3, 4, 5].includes(challenge?.difficulty) ? challenge.difficulty : 2;
 
-      const rawDiff = typeof challenge?.difficulty === "string" ? Number(challenge.difficulty) : challenge?.difficulty;
-      const difficulty = [1, 2, 3, 4, 5].includes(rawDiff) ? rawDiff : 2;
-
-      const benefitText =
-        typeof challenge?.benefit === "string" && challenge.benefit.trim()
-          ? challenge.benefit.trim()
-          : null;
-
-      // Persist as custom challenge (no random picks)
       await supabase.from("user_challenges").insert({
         user_id: user.id,
         is_custom: true,
@@ -424,14 +371,12 @@ serve(async (req) => {
         scheduled_date: new Date().toISOString().slice(0, 10),
         status: "pending",
         feedback: null,
-        trainer_response: benefitText,
+        trainer_response: toStringSafe(challenge?.benefit, null),
       });
 
-      // Respond with the same JSON string so the UI can parse/use it
       return json({ response: content, success: true });
     }
 
-    // Non-create → human text
     return json({ response: content, success: true });
   } catch (err: any) {
     console.error("ai-trainer error:", err);
