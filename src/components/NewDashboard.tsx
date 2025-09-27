@@ -236,80 +236,84 @@ const NewDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className={`max-w-7xl mx-auto px-4 py-8 transition-all duration-300 ${
-        isCoachOpen ? 'lg:mr-80' : ''
-      }`}>
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold mb-2 text-foreground">
-              {getGreeting()} — ready for your 1%?
+    <div className="min-h-screen bg-gradient-soft">
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Warm Welcome */}
+          <div className="text-center py-8">
+            <h1 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-2">
+              {getGreeting()}, {user?.email?.split('@')[0] || 'friend'}
             </h1>
-            <div className="flex items-center space-x-4 text-muted-foreground">
-              <span className="flex items-center">
-                <Calendar className="h-4 w-4 mr-1" />
-                Day {currentDay} of your journey
-              </span>
-              <span className="flex items-center">
-                <Flame className="h-4 w-4 mr-1" />
-                {streak.current_streak} day streak
-              </span>
-            </div>
+            <p className="text-muted-foreground text-lg">
+              Day {currentDay} • {streak.current_streak} day streak
+            </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
-            <User className="h-4 w-4 mr-2" />
-            Profile
-          </Button>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Calm Welcome Strip */}
-            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 text-center border border-primary/10">
-              <h2 className="font-display text-2xl md:text-3xl font-medium mb-3 text-foreground">
-                1% Better, Today
-              </h2>
-              <p className="text-muted-foreground mb-4 text-lg">
-                Small wins, zero shame. Day {currentDay} of your journey.
-              </p>
-              <div className="flex items-center justify-center space-x-6 text-sm">
-                <div className="flex items-center space-x-2 bg-success/10 px-3 py-1 rounded-full">
-                  <Flame className="h-4 w-4 text-success" />
-                  <span className="font-medium">{streak.current_streak} day streak</span>
-                </div>
-                <div className="flex items-center space-x-2 bg-accent/10 px-3 py-1 rounded-full">
-                  <Trophy className="h-4 w-4 text-accent" />
-                  <span className="font-medium">Best: {streak.longest_streak}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Today's Challenge - Centerpiece */}
-            {todayChallenge ? (
-              <Card className="card-feature relative border-2 border-primary/20 shadow-glow">
-                <div className={`absolute top-0 left-0 w-2 h-full ${getCategoryColor(todayChallenge.category)} rounded-l-lg`}></div>
-                <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <Badge 
-                          variant="outline" 
-                          className={`capitalize ${getCategoryColor(todayChallenge.category)} text-white border-transparent`}
-                        >
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Main Focus Area */}
+            <div className="lg:col-span-3 space-y-8">
+              {/* Today's Focus */}
+              {todayChallenge ? (
+                <div className="bg-gradient-card rounded-3xl p-8 shadow-warm border border-border/50">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="space-y-3">
+                      <h2 className="text-xl font-display font-bold text-foreground">
+                        Today's Focus
+                      </h2>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{todayChallenge.estimated_time}m</span>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(todayChallenge.category)}`}>
                           {todayChallenge.category}
-                        </Badge>
+                        </div>
                       </div>
-                      <CardTitle className="text-2xl md:text-3xl font-bold mb-2">
-                        {todayChallenge.title}
-                      </CardTitle>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {todayChallenge.description}
-                      </p>
                     </div>
+                    <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setShowDeleteDialog(true)}>
+                      <span className="text-xs text-muted-foreground">Skip</span>
+                    </Button>
                   </div>
-                </CardHeader>
+                  
+                  <h3 className="text-2xl font-display font-bold text-foreground mb-4">
+                    {todayChallenge.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
+                    {todayChallenge.description}
+                  </p>
+                  
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={() => setShowActionModal(true)}
+                      size="lg"
+                      className="flex-1 bg-gradient-warm hover:shadow-warm transition-all duration-500 rounded-xl text-lg py-6"
+                    >
+                      Let's do this
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setFeedback('just_right')}
+                      size="lg"
+                      className="rounded-xl border-2"
+                    >
+                      ✓
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-muted/30 rounded-3xl p-12 text-center border border-dashed border-border">
+                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Plus className="w-10 h-10 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-foreground mb-3">All done for today</h3>
+                  <p className="text-muted-foreground mb-6 text-lg">You've completed today's focus. Great work!</p>
+                  <CreateChallengeModal>
+                    <Button className="bg-gradient-warm rounded-xl px-8">
+                      Create Something New
+                    </Button>
+                  </CreateChallengeModal>
+                </div>
+              )}
                 <CardContent>
                   {todayChallenge.benefit && (
                       <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-6 border border-success/20">
@@ -414,33 +418,38 @@ const NewDashboard = () => {
                   </CreateChallengeModal>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card 
-                className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer" 
-                onClick={() => setShowShareCard(true)}
-              >
-                <CardContent className="p-4 text-center">
-                  <Share2 className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Generate Share Card</h3>
-                  <p className="text-xs text-muted-foreground">Show off your progress</p>
-                </CardContent>
-              </Card>
-              
-              <AddNoteModal>
-                <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer">
-                  <CardContent className="p-4 text-center">
-                    <StickyNote className="h-8 w-8 text-accent mx-auto mb-2" />
-                    <h3 className="font-semibold mb-1">Add a Note</h3>
-                    <p className="text-xs text-muted-foreground">Reflect on your day</p>
-                  </CardContent>
-                </Card>
-              </AddNoteModal>
-              
-              <Card className="card-feature hover:shadow-soft transition-all duration-200 cursor-pointer" onClick={() => navigate('/history')}>
-                <CardContent className="p-4 text-center">
+            </div>
+            
+            {/* Quick Stats Sidebar */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card rounded-2xl p-6 border border-border/50">
+                <h3 className="font-display text-lg font-bold text-foreground mb-4">
+                  Your Journey
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{streak.current_streak}</div>
+                    <div className="text-sm text-muted-foreground">Current Streak</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-accent">{totalChallenges.data || 0}</div>
+                    <div className="text-sm text-muted-foreground">Completed</div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <Button 
+                    variant="outline" 
+                    className="w-full rounded-xl"
+                    onClick={() => navigate('/progress')}
+                  >
+                    View Full Progress
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
                   <History className="h-8 w-8 text-success mx-auto mb-2" />
                   <h3 className="font-semibold mb-1">See History</h3>
                   <p className="text-xs text-muted-foreground">Track your journey</p>
