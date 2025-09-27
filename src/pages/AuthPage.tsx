@@ -1,16 +1,89 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, Mail, Lock, User, AlertCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+
+/** Inline reset password view shown when URL has ?mode=reset */
+const ResetPasswordView = () => {
+  const [pw, setPw] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pw.length < 6) {
+      setErr("Password must be at least 6 characters.");
+      return;
+    }
+    setLoading(true);
+    setErr(null);
+    setMsg(null);
+
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    setLoading(false);
+
+    if (error) {
+      setErr(error.message);
+      return;
+    }
+    setMsg("Password updated. Please sign in again.");
+    await supabase.auth.signOut();
+    // Optional: redirect to sign-in
+    // window.location.href = "/auth";
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md card-gradient">
+        <CardHeader>
+          <CardTitle>Set a new password</CardTitle>
+          <CardDescription>Enter your new password below.</CardDescription>
+        </CardHeader>
+        <form onSubmit={submit}>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="new-password">New password</Label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  className="pl-10"
+                  minLength={6}
+                  required
+                />
+              </div>
+            </div>
+            {err && <p className="text-sm text-red-600">{err}</p>}
+            {msg && <p className="text-sm text-green-600">{msg}</p>}
+          </CardContent>
+          <CardFooter className="flex-col gap-3">
+            <Button type="submit" className="w-full btn-hero" disabled={loading}>
+              {loading ? "Saving..." : "Set new password"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button variant="ghost" onClick={() => (window.location.href = "/auth")}>
+              Back to sign in
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  );
+};
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -18,27 +91,18 @@ const AuthPage = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-
   const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const location = useLocation();
 
-  // If the magic link includes tokens in the URL hash, set the session.
-  useEffect(() => {
-    if (window.location.hash.includes("access_token")) {
-      const qs = new URLSearchParams(window.location.hash.slice(1));
-      const access_token = qs.get("access_token");
-      const refresh_token = qs.get("refresh_token");
-      if (access_token && refresh_token) {
-        supabase.auth.setSession({ access_token, refresh_token }).catch(() => {});
-      }
-    }
-  }, []);
+  // If the email link brought the user to /auth?mode=reset, show inline reset view
+  const params = new URLSearchParams(location.search);
+  const isResetMode = params.get("mode") === "reset";
+  if (isResetMode) return <ResetPasswordView />;
 
-  // Use the Edge Function so we can send a custom email via Resend
   const sendReset = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const targetEmail = (resetEmail || email).trim();
@@ -49,60 +113,89 @@ const AuthPage = () => {
     setLoading(true);
     setError(null);
 
-    const redirectTo = `${window.location.origin}/auth?mode=reset`;
-    const { data, error } = await supabase.functions.invoke("ai-trainer", {
-      body: { action: "send_password_reset", email: targetEmail, redirectTo },
-    });
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-trainer`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "send_password_reset",
+            email: targetEmail,
+            redirectTo: `${window.location.origin}/auth?mode=reset`,
+          }),
+        }
+      );
 
-    setLoading(false);
-    if (error || !data?.success) {
-      setError(error?.message || data?.error || "Could not send reset email.");
-      return;
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Failed to send reset email.");
+      }
+
+      toast({
+        title: "Check your inbox",
+        description: `We sent a reset link to ${targetEmail}.`,
+      });
+      setResetOpen(false);
+    } catch (err: any) {
+      setError(err.message || "Couldn't send reset email.");
+    } finally {
+      setLoading(false);
     }
-    toast({ title: "Check your inbox", description: `We sent a reset link to ${targetEmail}.` });
-    setResetOpen(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     const { error } = await signUp(email, password, fullName);
-    setLoading(false);
 
     if (error) {
       setError(error.message);
-      return;
+    } else {
+      toast({
+        title: "Account created successfully!",
+        description: "Please check your email to confirm your account.",
+      });
+      navigate("/dashboard");
     }
-    toast({ title: "Account created!", description: "Check your email to confirm your account." });
-    navigate("/dashboard");
+    setLoading(false);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     const { error } = await signIn(email, password);
-    setLoading(false);
 
     if (error) {
       setError(error.message);
-      return;
+    } else {
+      toast({
+        title: "Welcome back!",
+        description: "Successfully signed in to your account.",
+      });
+      navigate("/dashboard");
     }
-    toast({ title: "Welcome back!", description: "Signed in successfully." });
-    navigate("/dashboard");
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="font-display text-4xl font-bold text-foreground mb-2">Welcome to Looped</h1>
-          <p className="text-muted-foreground text-lg">Your journey to daily 1% improvements starts here</p>
-          <div className="text-sm text-primary mt-2 flex items-center justify-center gap-1">
-            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            <span>Mobile app with free features coming soon!</span>
-          </div>
+          <h1 className="font-display text-4xl font-bold text-foreground mb-2">
+            Welcome to Looped
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Your journey to daily 1% improvements starts here
+          </p>
+          <p className="text-sm text-primary mt-2 flex items-center justify-center gap-1">
+            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+            Mobile app with free features coming soon!
+          </p>
         </div>
 
         <Card className="card-gradient">
