@@ -17,7 +17,7 @@ const PricingPage = () => {
     monthly: [
       {
         name: "Monthly Premium",
-        price: "$7.99",
+        price: "$14.99",
         period: "month",
         description: "Full access to transform your life",
         icon: <Star className="h-6 w-6" />,
@@ -38,15 +38,15 @@ const PricingPage = () => {
       },
       {
         name: "Yearly Premium",
-        price: "$59.99",
+        price: "$149.99",
         period: "year",
-        originalPrice: "$95.88",
-        savings: "Save $35.89",
+        originalPrice: "$179.88",
+        savings: "Save $29.89",
         description: "Best value for serious self-improvement",
         icon: <Crown className="h-6 w-6" />,
         features: [
           "Everything in Monthly Premium",
-          "37% discount (2 months free!)",
+          "17% discount",
           "Exclusive yearly challenges",
           "Advanced analytics dashboard",
           "Goal-setting workshops",
@@ -64,15 +64,15 @@ const PricingPage = () => {
     yearly: [
       {
         name: "Yearly Premium",
-        price: "$59.99",
+        price: "$149.99",
         period: "year",
-        originalPrice: "$95.88",
-        savings: "Save $35.89",
+        originalPrice: "$179.88",
+        savings: "Save $29.89",
         description: "Best value for transforming your life",
         icon: <Crown className="h-6 w-6" />,
         features: [
           "Everything in monthly Premium",
-          "37% discount (2 months free!)",
+          "17% discount",
           "Exclusive yearly challenges",
           "Advanced analytics dashboard",
           "Goal-setting workshops",
@@ -88,7 +88,7 @@ const PricingPage = () => {
       },
       {
         name: "Monthly Premium",
-        price: "$7.99",
+        price: "$14.99",
         period: "month", 
         description: "Full access, billed monthly",
         icon: <Star className="h-6 w-6" />,
@@ -152,7 +152,7 @@ const PricingPage = () => {
             <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as "monthly" | "yearly")} className="w-fit mx-auto mb-12">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">Yearly (Save 37%)</TabsTrigger>
+                <TabsTrigger value="yearly">Yearly (Save 17%)</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -275,7 +275,7 @@ const PricingPage = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    The yearly plan saves you 37% compared to monthly billing, plus includes exclusive features like quarterly coaching sessions, advanced analytics, and custom habit creation tools.
+                    The yearly plan saves you 17% compared to monthly billing, plus includes exclusive features like quarterly coaching sessions, advanced analytics, and custom habit creation tools.
                   </p>
                 </CardContent>
               </Card>

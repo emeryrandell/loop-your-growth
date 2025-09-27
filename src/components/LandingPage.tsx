@@ -2,7 +2,7 @@ import { ArrowRight, CheckCircle, Users, Target, Brain, Smartphone } from "lucid
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import heroImage from "@/assets/hero-image.jpg";
+
 
 const LandingPage = () => {
   const features = [
@@ -56,13 +56,6 @@ const LandingPage = () => {
       <section className="relative py-20 md:py-32 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/20 to-background" />
         <div className="relative max-w-6xl mx-auto text-center">
-          <div className="mb-8">
-            <img 
-              src={heroImage} 
-              alt="Looped - 1% Better Every Day" 
-              className="w-32 h-32 mx-auto rounded-2xl shadow-glow"
-            />
-          </div>
           <h1 className="font-display text-5xl md:text-7xl font-bold text-foreground mb-6 animate-fade-in-up">
             1% Better, Every Day.
           </h1>
@@ -120,7 +113,7 @@ const LandingPage = () => {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold mb-2">Monthly</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">$7.99</span>
+                  <span className="text-4xl font-bold">$14.99</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <Button className="w-full btn-ghost-warm" onClick={() => window.location.href = "/pricing"}>
@@ -137,10 +130,10 @@ const LandingPage = () => {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold mb-2">Yearly</h3>
                 <div className="mb-2">
-                  <span className="text-4xl font-bold">$59.99</span>
+                  <span className="text-4xl font-bold">$149.99</span>
                   <span className="text-muted-foreground">/year</span>
                 </div>
-                <p className="text-sm text-success font-medium mb-6">Save $35.89 annually</p>
+                <p className="text-sm text-success font-medium mb-6">Save $29.89 annually</p>
                 <Button className="w-full btn-hero" onClick={() => window.location.href = "/pricing"}>
                   Get Started
                 </Button>
