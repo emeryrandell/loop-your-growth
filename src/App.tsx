@@ -24,7 +24,6 @@ import { Sparkles } from "lucide-react";
 import CalendarTodoPage from "./pages/CalendarToDoPage";
 import DailyPlannerPage from "./pages/DailyPlannerPage";
 import JournalPage from "./pages/JournalPage";
-import DailyPlannerPage from "./pages/DailyPlannerPage";
 
 /** DB types (expanded for custom entries) */
 export interface Challenge {
@@ -369,22 +368,23 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/features" element={<FeaturesPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/progress" element={<ProgressPage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/insights" element={<InsightsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-              <Route path="/planner" element={<DailyPlannerPage />} />
-              <Route path="/journal" element={<JournalPage />} />
-              <Route path="/calendar-todo" element={<CalendarTodoPage />} />
-              <Route path="/daily-planner" element={<DailyPlannerPage />} />
+  <Route path="/" element={<Index />} />
+  <Route path="/auth" element={<AuthPage />} />
+  <Route path="/features" element={<FeaturesPage />} />
+  <Route path="/pricing" element={<PricingPage />} />
+  <Route path="/faq" element={<FAQPage />} />
+  <Route path="/dashboard" element={<DashboardPage />} />
+  <Route path="/progress" element={<ProgressPage />} />
+  <Route path="/history" element={<HistoryPage />} />
+  <Route path="/insights" element={<InsightsPage />} />
+  <Route path="/settings" element={<SettingsPage />} />
+  <Route path="/calendar-todo" element={<CalendarTodoPage />} />
+  <Route path="/planner" element={<DailyPlannerPage />} />
+  <Route path="/daily-planner" element={<DailyPlannerPage />} />  {/* alias */}
+  <Route path="/journal" element={<JournalPage />} />
+  <Route path="*" element={<NotFound />} />
             </Routes>
+
           </div>
 </BrowserRouter>
       </TooltipProvider>
