@@ -22,7 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import CalendarTodoPage from "./pages/CalendarToDoPage";
-
+import DailyPlannerPage from "./pages/DailyPlannerPage";
+import JournalPage from "./pages/JournalPage";
 
 /** DB types (expanded for custom entries) */
 export interface Challenge {
@@ -378,6 +379,8 @@ const App = () => (
               <Route path="/insights" element={<InsightsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/planner" element={<DailyPlannerPage />} />
+              <Route path="/journal" element={<JournalPage />} />
               <Route path="/calendar-todo" element={<CalendarTodoPage />} />
             </Routes>
           </div>
