@@ -22,17 +22,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
-  return (
-    <Button
-      onClick={onClick}
-      className="fixed bottom-6 right-6 rounded-full h-12 px-5 shadow-lg btn-hero"
-    >
-      <Sparkles className="h-4 w-4 mr-2" />
-      Ask Coach
-    </Button>
-  );
-}
-
 /** DB types (expanded for custom entries) */
 export interface Challenge {
   id: string;
