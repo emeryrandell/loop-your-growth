@@ -24,6 +24,7 @@ import { Sparkles } from "lucide-react";
 import CalendarTodoPage from "./pages/CalendarToDoPage";
 import DailyPlannerPage from "./pages/DailyPlannerPage";
 import JournalPage from "./pages/JournalPage";
+import DailyPlannerPage from "./pages/DailyPlannerPage";
 
 /** DB types (expanded for custom entries) */
 export interface Challenge {
@@ -382,6 +383,7 @@ const App = () => (
               <Route path="/planner" element={<DailyPlannerPage />} />
               <Route path="/journal" element={<JournalPage />} />
               <Route path="/calendar-todo" element={<CalendarTodoPage />} />
+              <Route path="/daily-planner" element={<DailyPlannerPage />} />
             </Routes>
           </div>
 </BrowserRouter>
