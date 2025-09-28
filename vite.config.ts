@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: true,                                // 0.0.0.0 / ::
     port: Number(process.env.PORT) || 8080,
-    // ✅ The important bit
+    // The important bit
     allowedHosts: [
       "localhost",
       "127.0.0.1",
