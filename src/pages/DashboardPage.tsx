@@ -2,6 +2,9 @@ import Navigation from "@/components/Navigation";
 import NewDashboard from "@/components/NewDashboard";
 import { useTrainer } from "@/hooks/useTrainer";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { CalendarDays } from "lucide-react";
 
 const DashboardPage = () => {
   const { canAccessPaidFeatures } = useTrainer();
