@@ -21,12 +21,15 @@ import DoItNowModal from "./DoItNowModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import InProgressChallenges from "./InProgressChallenges";
+import { useNavigate, Link } from "react-router-dom";
+import { StickyNote } from "lucide-react";
 
 const NewDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { 
     trainerSettings, 
     todayChallenge, 
@@ -527,14 +530,6 @@ const NewDashboard = () => {
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Insights
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={() => navigate('/daily-planner')}
-                  >
-                    <StickyNote className="h-4 w-4 mr-2" />
-                    Planner & Journal
                   </Button>
                   <Button 
                     variant="ghost" 
