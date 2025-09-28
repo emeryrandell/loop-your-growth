@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,13 +41,13 @@ export default function JournalPage() {
   });
 
   // Update content when entry changes
-  useState(() => {
+  useEffect(() => {
     if (entry?.content !== undefined) {
       setContent(entry.content || "");
     } else {
       setContent("");
     }
-  });
+  }, [entry]);
 
   const saveEntry = useMutation({
     mutationFn: async () => {
