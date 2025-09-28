@@ -377,9 +377,6 @@ const App = () => (
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-
-            {/* shows on every page */}
-            <CoachFab />
           </div>
 </BrowserRouter>
       </TooltipProvider>

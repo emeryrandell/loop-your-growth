@@ -58,18 +58,17 @@ const Dashboard = () => {
                   <div>
                     <CardTitle className="text-2xl font-semibold">Today's Challenge</CardTitle>
                     <div className="flex items-center mt-2 space-x-2">
-                     <Badge variant="outline">{todayChallenge.category}</Badge>
-                      <Badge variant={todayChallenge.difficulty === 'beginner' ? 'secondary' : 'default'}>
-                        {todayChallenge.difficulty}
+                     <Badge variant="outline">Study</Badge>
+                      <Badge variant="secondary">
+                        beginner
+                      </Badge>
                     </div>
                   </div>
                   <Target className="h-6 w-6 text-primary" />
                 </div>
               </CardHeader>
               <CardContent>
-                <h3 className="text-xl font-medium mb-3">Complete 25-minute Focused Study Session</h3>
-                <h3 className="text-xl font-medium mb-3">{todayChallenge.title}</h3>
-                <p className="text-muted-foreground mb-6">{todayChallenge.description}</p>
+                <p className="text-muted-foreground mb-6">Practice focused study techniques to improve concentration and retention.</p>
                 {!todayCompleted ? (
                   <div className="space-y-4">
                     <Button 

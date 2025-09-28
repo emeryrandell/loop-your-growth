@@ -4,15 +4,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-export default defineConfig(({ mode }) => ({
-  server: { host: "::", port: 8080 },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
-  build: {
-    chunkSizeWarningLimit: 1500, // ← raise from 500kB to 1.5MB
-  },
-}));
-
 // Replit gives you a public URL like:
 // 5bf22256-a2b2-4f77-8a4e-2b86b168b286-00-grgnq6re9vqn.riker.replit.dev
 // Paste that exact host here (or set env PUBLIC_HOST in Replit Secrets)
