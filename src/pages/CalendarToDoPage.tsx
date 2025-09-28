@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import {
   Check,
   CheckCircle2,
   ListChecks,
+  ArrowLeft,             // ← NEW
 } from "lucide-react";
 
 /* ---------- timezone-safe date helpers (LOCAL) ---------- */
@@ -37,12 +39,9 @@ const monIndex = (d: Date) => (d.getDay() + 6) % 7; // Monday=0
 /** Always returns 6 full weeks (42 cells) starting on Monday */
 function daysInGrid(monthAnchor: Date) {
   const start = startOfMonth(monthAnchor);
-  const end = endOfMonth(monthAnchor);
-
   const gridStart = addDays(start, -monIndex(start));
   const days: Date[] = [];
   let cur = new Date(gridStart);
-
   while (days.length < 42) {
     days.push(new Date(cur));
     cur = addDays(cur, 1);
@@ -55,6 +54,7 @@ export default function CalendarTodoPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const navigate = useNavigate();   // ← NEW
 
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selected, setSelected] = useState<Date>(() => new Date());
@@ -137,7 +137,7 @@ export default function CalendarTodoPage() {
   );
 
   /* ---- mutations ---- */
-  const addTodo = useMutation({
+  const { mutate: addTodo } = useMutation({
     mutationFn: async () => {
       if (!newTitle.trim()) throw new Error("Title required");
       const { error } = await supabase.from("todos").insert({
@@ -162,7 +162,7 @@ export default function CalendarTodoPage() {
       }),
   });
 
-  const toggleTodo = useMutation({
+  const { mutate: toggleTodo } = useMutation({
     mutationFn: async (t: any) => {
       const next = !t.is_done;
       const { error } = await supabase
@@ -179,7 +179,7 @@ export default function CalendarTodoPage() {
     },
   });
 
-  const deleteTodo = useMutation({
+  const { mutate: deleteTodo } = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("todos").delete().eq("id", id);
       if (error) throw error;
@@ -195,7 +195,14 @@ export default function CalendarTodoPage() {
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl md:text-4xl">Calendar & To-Do</h1>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h1 className="font-display text-3xl md:text-4xl">Calendar & To-Do</h1>
+        </div>
+
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -250,7 +257,7 @@ export default function CalendarTodoPage() {
               {grid.map((d, i) => {
                 const k = fmtLocalDate(d);
                 const inThisMonth = d.getMonth() === month.getMonth();
-                const isSelected = k === selKey;
+                const isSelected = k === fmtLocalDate(selected);
                 const act = activity[k];
 
                 return (
@@ -325,7 +332,7 @@ export default function CalendarTodoPage() {
                     onChange={(e) => setNewTitle(e.target.value)}
                   />
                   <Button
-                    onClick={() => addTodo.mutate()}
+                    onClick={() => addTodo()}
                     disabled={!newTitle.trim()}
                   >
                     <Plus className="h-4 w-4 mr-1" /> Add
@@ -342,20 +349,20 @@ export default function CalendarTodoPage() {
               {/* To-Do list */}
               <div className="space-y-2">
                 <div className="font-medium">To-Dos</div>
-                {dayTodos.length === 0 && (
+                {(dayTodos as any[]).length === 0 && (
                   <div className="text-sm text-muted-foreground">
                     No to-dos yet.
                   </div>
                 )}
                 <ul className="space-y-2">
-                  {dayTodos.map((t: any) => (
+                  {(dayTodos as any[]).map((t: any) => (
                     <li
                       key={t.id}
                       className="flex items-start justify-between gap-2 p-2 rounded-md border"
                     >
                       <div className="flex items-start gap-2">
                         <button
-                          onClick={() => toggleTodo.mutate(t)}
+                          onClick={() => toggleTodo(t)}
                           className={`mt-1 h-5 w-5 rounded border flex items-center justify-center ${
                             t.is_done
                               ? "bg-success/20 border-success"
@@ -384,7 +391,7 @@ export default function CalendarTodoPage() {
                       </div>
                       <button
                         className="text-muted-foreground hover:text-destructive"
-                        onClick={() => deleteTodo.mutate(t.id)}
+                        onClick={() => deleteTodo(t.id)}
                         title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -397,13 +404,13 @@ export default function CalendarTodoPage() {
               {/* Completed challenges */}
               <div className="space-y-2">
                 <div className="font-medium">Completed challenges</div>
-                {dayCompletions.length === 0 && (
+                {(dayCompletions as any[]).length === 0 && (
                   <div className="text-sm text-muted-foreground">
                     None completed.
                   </div>
                 )}
                 <ul className="space-y-2">
-                  {dayCompletions.map((c: any) => {
+                  {(dayCompletions as any[]).map((c: any) => {
                     const title =
                       c.custom_title || c.challenges?.title || "Challenge";
                     const mins =
