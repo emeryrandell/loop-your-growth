@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-import CalendarTodoPage from "./pages/CalendarTodoPage";
+import CalendarTodoPage from "./pages/CalendarToDoPage";
 
 
 /** DB types (expanded for custom entries) */
