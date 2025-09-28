@@ -531,6 +531,14 @@ const NewDashboard = () => {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start" 
+                    onClick={() => navigate('/calendar-todo')}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Calendar & Tasks
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
                     onClick={() => navigate('/history')}
                   >
                     <History className="h-4 w-4 mr-2" />
