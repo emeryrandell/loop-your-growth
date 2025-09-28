@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-import CalendarTodoPage from "./pages/CalendarToDoPage";
+// import CalendarTodoPage from "./pages/CalendarToDoPage";
 
 
 /** DB types (expanded for custom entries) */
@@ -378,7 +378,7 @@ const App = () => (
               <Route path="/insights" element={<InsightsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
-              <Route path="/calendar" element={<CalendarTodoPage />} />
+              {/* <Route path="/calendar" element={<CalendarTodoPage />} /> */}
             </Routes>
           </div>
 </BrowserRouter>
