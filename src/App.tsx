@@ -22,21 +22,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
-function CoachFab() {
-  const { toast } = useToast();
-  const { createChallengeFromCoach } = useChallenges();
-
-  const onClick = async () => {
-    const msg = window.prompt('Tell the coach what you want:\n(e.g. "make me a 27 minute focus challenge")');
-    if (!msg) return;
-    try {
-      await createChallengeFromCoach(msg);
-      toast({ title: "Challenge added", description: "Check your list." });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Coach error", description: e?.message || "Something went wrong" });
-    }
-  };
-
   return (
     <Button
       onClick={onClick}
