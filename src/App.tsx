@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import CalendarTodoPage from "./pages/CalendarTodoPage";
 
+
 /** DB types (expanded for custom entries) */
 export interface Challenge {
   id: string;
